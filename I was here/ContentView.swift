@@ -6,21 +6,45 @@
 //
 
 import SwiftUI
+#if(macOS)
+import AppKit
+#elseif(iOS)
+import UIKit
+#endif
+import UniformTypeIdentifiers
+
+extension UTType {
+    static var gpx: UTType {
+        UTType(importedAs: "public.xml")
+    }
+}
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
-        }
-        .padding()
+        FilePickerView()
     }
 }
 
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
+struct FilePickerView: View {
+    @State private var isPickerPresented = false
+    var body: some View {
+        VStack {
+            Button("Select GPX Folder") {
+                isPickerPresented = true
+            }
+        }
+        .fileImporter(
+            isPresented: $isPickerPresented,
+            allowedContentTypes: [.folder, .gpx],
+            allowsMultipleSelection: false
+        ) { result in
+            do {
+                let folderURL = try result.get().first!
+                // Do something with the selected folder URL
+            } catch {
+                // Handle failure cases here
+            }
+        }
     }
 }
+
