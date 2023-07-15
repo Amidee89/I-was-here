@@ -58,34 +58,12 @@ struct FilePickerView: View {
     }
 }
 
-
 func processFiles(at urls: [URL]) {
     for url in urls {
         if url.pathExtension == "gpx" {
             processGPXFile(at: url)
         } else if url.hasDirectoryPath {
             processFilesInFolder(at: url)
-        }
-    }
-}
-
-func processGPXFile(at url: URL) {
-    do {
-        let fileAttributes = try FileManager.default.attributesOfItem(atPath: url.path)
-        if let fileSize = fileAttributes[FileAttributeKey.size] as? NSNumber {
-            print("File size: \(fileSize.intValue) bytes")
-        }
-    } catch {
-        print("Failed to get file size for \(url.path)")
-    }
-
-    if let gpx = GPXParser(withURL: url)?.parsedData() {
-        let trackCount = gpx.tracks.count
-        print("Number of tracks: \(trackCount)")
-
-        for (index, track) in gpx.tracks.enumerated() {
-            let trackpointsCount = track.segments.flatMap { $0.points }.count
-            print("Track \(index + 1) has \(trackpointsCount) trackpoints")
         }
     }
 }

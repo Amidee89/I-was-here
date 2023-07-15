@@ -9,6 +9,7 @@ import SwiftUI
 import MapKit
 #if os(iOS)
 struct MapRepresentableView: UIViewRepresentable {
+
     @Binding var region: MKCoordinateRegion
     var overlays: [MKOverlay]
     var annotations: [MKAnnotation]
@@ -37,7 +38,7 @@ struct MapRepresentableView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            // !!PLACEHOLDER!!
+            // This is a placeholder, you need to return a proper MKOverlayRenderer based on the overlay type
             return MKOverlayRenderer()
         }
     }

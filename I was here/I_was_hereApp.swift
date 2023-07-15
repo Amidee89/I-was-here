@@ -13,7 +13,7 @@ struct I_was_hereApp: App {
         WindowGroup {
             ContentView()
         }
-        #if(macOS)
+        #if os(macOS)
         .windowStyle(HiddenTitleBarWindowStyle())
         #endif
     }
