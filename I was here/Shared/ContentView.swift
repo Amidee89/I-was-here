@@ -13,6 +13,7 @@ import UIKit
 #endif
 import UniformTypeIdentifiers
 import CoreGPX
+import MapKit
 
 extension UTType {
     static var gpx: UTType {
@@ -28,11 +29,18 @@ struct ContentView: View {
 
 struct FilePickerView: View {
     @State private var isPickerPresented = false
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 34.011_286, longitude: -116.166_868),
+        span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
+    )
     var body: some View {
         VStack {
             Button("Select GPX Folder or files") {
                 isPickerPresented = true
             }
+            .padding()
+            Divider()
+            MapRepresentableView(region: $region, overlays: [], annotations: [])
         }
         .fileImporter(
             isPresented: $isPickerPresented,
@@ -49,6 +57,7 @@ struct FilePickerView: View {
         }
     }
 }
+
 
 func processFiles(at urls: [URL]) {
     for url in urls {
@@ -75,7 +84,7 @@ func processGPXFile(at url: URL) {
         print("Number of tracks: \(trackCount)")
 
         for (index, track) in gpx.tracks.enumerated() {
-            let trackpointsCount = track.tracksegments.flatMap { $0.trackpoints }.count
+            let trackpointsCount = track.segments.flatMap { $0.points }.count
             print("Track \(index + 1) has \(trackpointsCount) trackpoints")
         }
     }

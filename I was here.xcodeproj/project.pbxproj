@@ -14,8 +14,8 @@
 		A9E87F092A607E1C00116428 /* I_was_hereTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F082A607E1C00116428 /* I_was_hereTests.swift */; };
 		A9E87F132A607E1C00116428 /* I_was_hereUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F122A607E1C00116428 /* I_was_hereUITests.swift */; };
 		A9E87F152A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F142A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift */; };
-		A9E87F252A6082F100116428 /* iwashere.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F232A6082F100116428 /* iwashere.xcdatamodeld */; };
 		A9E87F282A619FAD00116428 /* CoreGPX in Frameworks */ = {isa = PBXBuildFile; productRef = A9E87F272A619FAD00116428 /* CoreGPX */; };
+		A9E87F2E2A62C17C00116428 /* MapRepresentableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,7 +47,8 @@
 		A9E87F0E2A607E1C00116428 /* I was hereUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "I was hereUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9E87F122A607E1C00116428 /* I_was_hereUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I_was_hereUITests.swift; sourceTree = "<group>"; };
 		A9E87F142A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I_was_hereUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		A9E87F242A6082F100116428 /* iwashere.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = iwashere.xcdatamodel; sourceTree = "<group>"; };
+		A9E87F2C2A62BDD100116428 /* I-was-here-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "I-was-here-Info.plist"; sourceTree = SOURCE_ROOT; };
+		A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRepresentableView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,9 +100,9 @@
 		A9E87EF52A607E1A00116428 /* I was here */ = {
 			isa = PBXGroup;
 			children = (
+				A9E87F302A62C33700116428 /* Shared */,
+				A9E87F2C2A62BDD100116428 /* I-was-here-Info.plist */,
 				A9E87EF62A607E1A00116428 /* I_was_hereApp.swift */,
-				A9E87EF82A607E1A00116428 /* ContentView.swift */,
-				A9E87F232A6082F100116428 /* iwashere.xcdatamodeld */,
 				A9E87EFA2A607E1B00116428 /* Assets.xcassets */,
 				A9E87EFC2A607E1B00116428 /* I_was_here.entitlements */,
 				A9E87EFD2A607E1B00116428 /* Preview Content */,
@@ -132,6 +133,15 @@
 				A9E87F142A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift */,
 			);
 			path = "I was hereUITests";
+			sourceTree = "<group>";
+		};
+		A9E87F302A62C33700116428 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				A9E87EF82A607E1A00116428 /* ContentView.swift */,
+				A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -271,7 +281,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A9E87EF92A607E1A00116428 /* ContentView.swift in Sources */,
-				A9E87F252A6082F100116428 /* iwashere.xcdatamodeld in Sources */,
+				A9E87F2E2A62C17C00116428 /* MapRepresentableView.swift in Sources */,
 				A9E87EF72A607E1A00116428 /* I_was_hereApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -429,6 +439,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"I was here/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "I-was-here-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -465,6 +476,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"I was here/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "I-was-here-Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -635,19 +647,6 @@
 			productName = CoreGPX;
 		};
 /* End XCSwiftPackageProductDependency section */
-
-/* Begin XCVersionGroup section */
-		A9E87F232A6082F100116428 /* iwashere.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				A9E87F242A6082F100116428 /* iwashere.xcdatamodel */,
-			);
-			currentVersion = A9E87F242A6082F100116428 /* iwashere.xcdatamodel */;
-			path = iwashere.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = A9E87EEB2A607E1A00116428 /* Project object */;
 }
