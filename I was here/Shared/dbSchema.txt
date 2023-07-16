@@ -1,0 +1,19 @@
+gpx: id, version, creator, importDate, extensions
+metadata: id, gpx_id, name, desc, time, keywords,extensions
+waypoints: id, gpx_id, ele, time, lat, lon, magvar, geoidheight, wptname, cmt, wptdesc, src, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, wptextensions 
+
+boundaries: id, minLat,minLon,maxLat,maxLon
+copyright: id, author, year, license, emails, id, id_email, domain
+extensions: id, raw, 
+links: id, href, text, type
+persons: id, name, email_id, link_id
+points: id, lat, lon, ele, time, 
+pointsegments: id, point_id
+routes: id, gpx_id, name, desc, type, 
+tracks: id, gpx_id, name, desc, type
+tracksegments: id, track_id 
+
+
+foreign key
+linktype -> metadata, waypoints
+boundstype -> metadata,

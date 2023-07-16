@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreGPX
+import SQLite
 
 func processGPXFile(at url: URL) {
     do {
