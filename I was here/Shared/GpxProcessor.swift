@@ -20,12 +20,7 @@ func processGPXFile(at url: URL) {
     }
 
     if let gpx = GPXParser(withURL: url)?.parsedData() {
-        let trackCount = gpx.tracks.count
-        print("Number of tracks: \(trackCount)")
-        createDB()
-        for (index, track) in gpx.tracks.enumerated() {
-            let trackpointsCount = track.segments.flatMap { $0.points }.count
-            print("Track \(index + 1) has \(trackpointsCount) trackpoints")
-        }
+        let gpxData = GPXParser(withURL: url)?.parsedData()
+        populateFromGPX(gpx: gpx)
     }
 }

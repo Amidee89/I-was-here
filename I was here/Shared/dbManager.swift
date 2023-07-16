@@ -7,6 +7,10 @@
 
 import Foundation
 import SQLite
+import CoreGPX
+let dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
+
+
 func createDB(){
     do {
         let path = NSSearchPathForDirectoriesInDomains(
@@ -330,5 +334,38 @@ func createDB(){
         // Handle error
         print(error)
     }
+}
 
+func populateFromGPX(gpx: GPXRoot) {
+    dbQueue.async {
+        do {
+            let path = NSSearchPathForDirectoriesInDomains(
+                .documentDirectory, .userDomainMask, true
+            ).first!
+            let db = try Connection("\(path)/iwh.sqlite3")
+            
+            let gpxTable = Table("gpx")
+            let gpxID = Expression<Int64>("id")
+            let version = Expression<String?>("version")
+            let creator = Expression<String?>("creator")
+            let importDate = Expression<Date>("importDate")
+            let extensions = Expression<String>("extensions")
+            print(gpx.version, gpx.creator)
+            let date = Date()
+            
+            try db.transaction {
+                let gpxID = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date))
+                // Use gpxID for other tables
+                
+//                for track in gpx.tracks {
+//                    let trackID = try db.run(trackTable.insert(gpx_id <- gpxID, name <- track.name /* Other columns */))
+//                    // Use trackID for other tables
+//                }
+
+                // Other tables
+            }
+        } catch {
+            print("Database operation failed: \(error)")
+        }
+    }
 }
