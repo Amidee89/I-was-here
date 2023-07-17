@@ -1,19 +1,27 @@
-gpx: id, version, creator, importDate, extensions
+    gpx: id, version, creator, importDate, extensions
 metadata: id, gpx_id, name, desc, time, keywords,extensions
-waypoints: id, gpx_id, ele, time, lat, lon, magvar, geoidheight, wptname, cmt, wptdesc, src, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, wptextensions 
-
-boundaries: id, minLat,minLon,maxLat,maxLon
-copyright: id, author, year, license, emails, id, id_email, domain
-extensions: id, raw, 
-links: id, href, text, type
-persons: id, name, email_id, link_id
-points: id, lat, lon, ele, time, 
-pointsegments: id, point_id
-routes: id, gpx_id, name, desc, type, 
 tracks: id, gpx_id, name, desc, type
-tracksegments: id, track_id 
+tracksegments: id, gpx_id, track_id 
+waypoints: id, gpx_id, trkseg_id, route_id, ele, time, lat, lon, magvar, geoidheight, wptname, cmt, wptdesc, src, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, wptextensions 
+routes: id, gpx_id, name, cmt, desc, src, number, type, extensions
+extensions: id, gpx_id, raw
+copyright: id, gpx_id, metadata_id author, year, license, emails, id, id_email, domain
+persons: id, gpx_id, metadata_id, name
+links: id, gpx_id, metadata_id, waypoint_id, href, text, type
+emails: id, gpx_id, domain 
+pointsegments: id, gpx_id
+points: id, ptseg_id, lat, lon, ele, time, 
+boundaries: id, gpx_id, metadata_id minLat,minLon,maxLat,maxLon
 
 
-foreign key
-linktype -> metadata, waypoints
-boundstype -> metadata,
+foreign keys:
+links -> metadata, waypoints, tracks, persons
+boundaries -> metadata
+waypoints -> routes, tracksegments
+tracksegments -> tracks
+person -> metadata
+copyright -> metadata
+
+
+warning foreign keys: metadata has links, bounds, person, copyright -> populate those when loading gpx. same for others.
+

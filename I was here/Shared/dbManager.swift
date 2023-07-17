@@ -21,8 +21,8 @@ func createDB(){
         // GPX Table
         let gpx = Table("gpx")
         let gpxID = Expression<Int64>("id")
-        let version = Expression<String>("version")
-        let creator = Expression<String>("creator")
+        let version = Expression<String?>("version")
+        let creator = Expression<String?>("creator")
         let importDate = Expression<Date>("importDate")
         let gpx_extensions = Expression<String?>("extensions")
 
@@ -99,18 +99,47 @@ func createDB(){
             t.foreignKey(gpxRefTrackSegments, references: gpx, gpxID)
         })
         
+        // Routes Table
+        let routes = Table("routes")
+        let routeID = Expression<Int64>("id")
+        let gpxRefRoutes = Expression<Int64>("gpx_id")
+        
+        let nameRoutes = Expression<String?>("name")
+        let cmtRoutes = Expression<String?>("cmt")
+        let descRoutes = Expression<String?>("desc")
+        let srcRoutes = Expression<String?>("src")
+        let number = Expression<Int?>("number")
+        let typeRoutes = Expression<String?>("type")
+        let extensionsRoutes = Expression<String?>("extensions")
+
+        try db.run(routes.create { t in
+            t.column(routeID, primaryKey: .autoincrement)
+            t.column(gpxRefRoutes)
+            t.column(nameRoutes)
+            t.column(cmtRoutes)
+            t.column(descRoutes)
+            t.column(srcRoutes)
+            t.column(number)
+            t.column(typeRoutes)
+            t.column(extensionsRoutes)
+            
+            t.foreignKey(gpxRefRoutes, references: gpx, gpxID)
+
+        })
+        
         // Waypoints Table
         let waypoints = Table("waypoints")
         let waypointID = Expression<Int64>("id")
         let wptGpxReference = Expression<Int64>("gpx_id")
-        let wptTrackSegmentReference = Expression<Int64>("trkseg_id")
+        let wptTrackSegmentReference = Expression<Int64?>("trkseg_id")
+        let wptRouteReference = Expression<Int64?>("route_id")
 
         let ele = Expression<Double?>("ele")
         let waypointTime = Expression<Date?>("time")
-        let lat = Expression<Double>("lat")
-        let lon = Expression<Double>("lon")
+        let lat = Expression<Double?>("lat")
+        let lon = Expression<Double?>("lon")
         let magvar = Expression<Double?>("magvar")
-        let geoidheight = Expression<Double>("geoidheight")
+        let geoidheight = Expression<Double?>("geoidheight")
         let wptName = Expression<String?>("name")
         let cmt = Expression<String?>("cmt")
         let wptDesc = Expression<String?>("desc")
@@ -118,18 +147,20 @@ func createDB(){
         let sym = Expression<String?>("sym")
         let type = Expression<String?>("type")
         let fix = Expression<String?>("fix")
-        let sat = Expression<Int>("sat")
-        let hdop = Expression<Double>("hdop")
-        let vdop = Expression<Double>("vdop")
-        let pdop = Expression<Double>("pdop")
-        let ageofdgpsdata = Expression<Double>("ageofdgpsdata")
-        let dgpsid = Expression<Double>("dgpsid")
+        let sat = Expression<Int?>("sat")
+        let hdop = Expression<Double?>("hdop")
+        let vdop = Expression<Double?>("vdop")
+        let pdop = Expression<Double?>("pdop")
+        let ageofdgpsdata = Expression<Double?>("ageofdgpsdata")
+        let dgpsid = Expression<Double?>("dgpsid")
         let wptExtensions = Expression<String?>("extensions")
         
         try db.run(waypoints.create { t in
             t.column(waypointID, primaryKey: .autoincrement)
             t.column(wptGpxReference)
             t.column(wptTrackSegmentReference)
+            t.column(wptRouteReference)
+
             t.column(ele)
             t.column(waypointTime)
             t.column(lat)
@@ -153,41 +184,16 @@ func createDB(){
             
             t.foreignKey(wptGpxReference, references: gpx, gpxID)
             t.foreignKey(wptTrackSegmentReference, references: tracksegments, tracksegmentID)
+            t.foreignKey(wptRouteReference, references: routes, routeID)
 
         })
 
-        // Routes Table
-        let routes = Table("routes")
-        let routeID = Expression<Int64>("id")
-        let gpxRefRoutes = Expression<Int64>("gpx_id")
-        let nameRoutes = Expression<String?>("name")
-        let cmtRoutes = Expression<String?>("cmt")
-        let descRoutes = Expression<String?>("desc")
-        let srcRoutes = Expression<String?>("src")
-        let number = Expression<Int>("number")
-        let typeRoutes = Expression<String?>("type")
-        let extensionsRoutes = Expression<String?>("extensions")
-
-        try db.run(routes.create { t in
-            t.column(routeID, primaryKey: .autoincrement)
-            t.column(gpxRefRoutes)
-            t.column(nameRoutes)
-            t.column(cmtRoutes)
-            t.column(descRoutes)
-            t.column(srcRoutes)
-            t.column(number)
-            t.column(typeRoutes)
-            t.column(extensionsRoutes)
-            
-            t.foreignKey(gpxRefRoutes, references: gpx, gpxID)
-
-        })
         
         // Extensions Table
         let extensions = Table("extensions")
         let extensionID = Expression<Int64>("id")
         let gpxRefExtensions = Expression<Int64>("gpx_id")
-        let raw = Expression<String>("raw")
+        let raw = Expression<String?>("raw")
         try db.run(extensions.create { t in
             t.column(extensionID, primaryKey: .autoincrement)
             t.column(raw)
@@ -202,7 +208,8 @@ func createDB(){
         let gpxRefCopyright = Expression<Int64>("gpx_id")
         let metadataRefCopyright = Expression<Int64>("metadata_id")
         let copyrightID = Expression<Int64>("id")
-        let authorCopyright = Expression<String>("author")
+        
+        let authorCopyright = Expression<String?>("author")
         let year = Expression<Int?>("year")
         let license = Expression<String?>("license")
         
@@ -221,10 +228,10 @@ func createDB(){
         // Persons Table
         let persons = Table("persons")
         let personID = Expression<Int64>("id")
-        let namePerson = Expression<String?>("name")
         let gpxRefPersons = Expression<Int64>("gpx_id")
         let metadataRefPersons = Expression<Int64>("metadata_id")
      
+        let namePerson = Expression<String?>("name")
         try db.run(persons.create { t in
             t.column(personID, primaryKey: .autoincrement)
             t.column(namePerson)
@@ -261,9 +268,10 @@ func createDB(){
         // Emails Table
         let emails = Table("emails")
         let emailID = Expression<Int64>("id")
-        let idEmail = Expression<String>("id_email")
-        let domain = Expression<String>("domain")
         let gpxRefEmails = Expression<Int64>("gpx_id")
+
+        let idEmail = Expression<String?>("id_email")
+        let domain = Expression<String?>("domain")
 
         try db.run(emails.create { t in
             t.column(emailID, primaryKey: .autoincrement)
