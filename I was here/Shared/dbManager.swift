@@ -200,6 +200,7 @@ func createDB(){
         // Copyright Table
         let copyright = Table("copyright")
         let gpxRefCopyright = Expression<Int64>("gpx_id")
+        let metadataRefCopyright = Expression<Int64>("metadata_id")
         let copyrightID = Expression<Int64>("id")
         let authorCopyright = Expression<String>("author")
         let year = Expression<Int?>("year")
@@ -211,9 +212,10 @@ func createDB(){
             t.column(year)
             t.column(license)
             t.column(gpxRefCopyright)
-
+            t.column(metadataRefCopyright)
+            
             t.foreignKey(gpxRefCopyright, references: gpx, gpxID)
-
+            t.foreignKey(metadataRefCopyright, references: metadata, metadataID)
         })
 
         // Persons Table
@@ -221,13 +223,15 @@ func createDB(){
         let personID = Expression<Int64>("id")
         let namePerson = Expression<String?>("name")
         let gpxRefPersons = Expression<Int64>("gpx_id")
-
+        let metadataRefPersons = Expression<Int64>("metadata_id")
+     
         try db.run(persons.create { t in
             t.column(personID, primaryKey: .autoincrement)
             t.column(namePerson)
             t.column(gpxRefPersons)
-
+            t.column(metadataRefPersons)
             t.foreignKey(gpxRefPersons, references: gpx, gpxID)
+            t.foreignKey(metadataRefPersons, references: metadata, metadataID)
         })
 
         // Links Table
@@ -343,26 +347,41 @@ func populateFromGPX(gpx: GPXRoot) {
                 .documentDirectory, .userDomainMask, true
             ).first!
             let db = try Connection("\(path)/iwh.sqlite3")
-            
+            let jsonEncoder = JSONEncoder()
+
+            //GPX table
             let gpxTable = Table("gpx")
             let gpxID = Expression<Int64>("id")
             let version = Expression<String?>("version")
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
-            let extensions = Expression<String>("extensions")
+            let extensions = Expression<String?>("extensions")
             print(gpx.version, gpx.creator)
             let date = Date()
-            
+            //for now, extensions are put as raw data
+            let jsonExtension = try jsonEncoder.encode(gpx.extensions)
+            let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             try db.transaction {
-                let gpxID = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date))
-                // Use gpxID for other tables
+                let gpxID = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, extensions <- jsonExtensionString))
+            
+            //Metadata table
+            let metadataTable = Table("metadata")
+            let metadataID = Expression<Int64>("id")
+            let gpx_id = Expression<Int64>("gpx_id")
+            let name = Expression<String?>("name")
+            let desc = Expression<String?>("desc")
+            let time = Expression<Date?>("time")
+            let keywords = Expression<String?>("keywords")
+            let extensions = Expression<String?>("extensions")
                 
-//                for track in gpx.tracks {
-//                    let trackID = try db.run(trackTable.insert(gpx_id <- gpxID, name <- track.name /* Other columns */))
-//                    // Use trackID for other tables
-//                }
+            if let metadata = gpx.metadata {
+                let jsonExtension = try jsonEncoder.encode(metadata.extensions)
+                let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+                
+                let metadataInsert = metadataTable.insert(gpx_id <- gpxID, name <- metadata.name, desc <- metadata.desc, time <- metadata.time, keywords <- metadata.keywords, extensions <- jsonExtensionString)
+                _ = try db.run(metadataInsert)
+            }
 
-                // Other tables
             }
         } catch {
             print("Database operation failed: \(error)")
