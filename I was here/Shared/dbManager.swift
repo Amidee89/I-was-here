@@ -321,10 +321,11 @@ func createDB(){
         // Boundaries Table
         let boundaries = Table("boundaries")
         let boundaryID = Expression<Int64>("id")
-        let minLat = Expression<Double>("minLat")
-        let minLon = Expression<Double>("minLon")
-        let maxLat = Expression<Double>("maxLat")
-        let maxLon = Expression<Double>("maxLon")
+        let minLat = Expression<Double?>("minLat")
+        let minLon = Expression<Double?>("minLon")
+        let maxLat = Expression<Double?>("maxLat")
+        let maxLon = Expression<Double?>("maxLon")
+        
         let gpxRefBoundaries = Expression<Int64>("gpx_id")
         let metadataRefBoundaries = Expression<Int64>("metadata_id")
         
@@ -387,7 +388,11 @@ func populateFromGPX(gpx: GPXRoot) {
                 let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
                 
                 let metadataInsert = metadataTable.insert(gpx_id <- gpxID, name <- metadata.name, desc <- metadata.desc, time <- metadata.time, keywords <- metadata.keywords, extensions <- jsonExtensionString)
-                _ = try db.run(metadataInsert)
+                let metadataID = try db.run(metadataInsert)
+                // Insert into boundaries
+                if let boundary = metadata.bounds {
+                    try populateBoundariesTable(db: db, boundary: boundary, gpxID: gpxID, metadataID: metadataID)
+                }
             }
 
             }
@@ -395,4 +400,24 @@ func populateFromGPX(gpx: GPXRoot) {
             print("Database operation failed: \(error)")
         }
     }
+}
+func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, metadataID: Int64) throws {
+    let boundariesTable = Table("boundaries")
+    let boundaryID = Expression<Int64>("id")
+    let gpx_id = Expression<Int64>("gpx_id")
+    let metadata_id = Expression<Int64>("metadata_id")
+    let minLat = Expression<Double?>("minLat")
+    let minLon = Expression<Double?>("minLon")
+    let maxLat = Expression<Double?>("maxLat")
+    let maxLon = Expression<Double?>("maxLon")
+    
+    let boundaryInsert = boundariesTable.insert(
+        gpx_id <- gpxID,
+        metadata_id <- metadataID,
+        minLat <- boundary.minLatitude,
+        minLon <- boundary.minLongitude,
+        maxLat <- boundary.maxLatitude,
+        maxLon <- boundary.maxLongitude
+    )
+    _ = try db.run(boundaryInsert)
 }
