@@ -14,8 +14,8 @@
             filePath = "I was here/Shared/dbManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "14"
-            endingLineNumber = "14"
+            startingLineNumber = "30"
+            endingLineNumber = "30"
             landmarkName = "createDB()"
             landmarkType = "9">
          </BreakpointContent>
