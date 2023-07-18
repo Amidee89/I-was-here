@@ -13,7 +13,8 @@ let dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
 let id = Expression<Int64>("id")
 let gpxReference = Expression<Int64>("gpx_id")
 let gpxExtensions = Expression<String?>("extensions")
-let metadataReference = Expression<Int64>("metadata_id")
+let metadataReference = Expression<Int64?>("metadata_id")
+let personReference = Expression<Int64?>("person_id")
 
 let name = Expression<String?>("name")
 let time = Expression<Date?>("time")
@@ -69,7 +70,6 @@ func createDB(){
         
         // Tracks Table
         let tracks = Table("tracks")
-        let extensionsTracks = Expression<String?>("extensions")
 
         try db.run(tracks.create { t in
             t.column(id, primaryKey: .autoincrement)
@@ -88,7 +88,7 @@ func createDB(){
         
         // TrackSegments Table
         let tracksegments = Table("tracksegments")
-        let trackReference = Expression<Int64>("track_id")
+        let trackReference = Expression<Int64?>("track_id")
 
         try db.run(tracksegments.create { t in
             t.column(id, primaryKey: .autoincrement)
@@ -214,7 +214,9 @@ func createDB(){
 
         // Links Table
         let links = Table("links")
-        let waypointsReference = Expression<Int64>("waypoint_id")
+        let waypointsReference = Expression<Int64?>("waypoint_id")
+        let tracksReference = Expression<Int64?>("track_id")
+        
         let href = Expression<String>("href")
         let textLink = Expression<String?>("text")
         let typeLink = Expression<String?>("type")
@@ -227,17 +229,22 @@ func createDB(){
             t.column(gpxReference)
             t.column(metadataReference)
             t.column(waypointsReference)
+            t.column(personReference)
+            t.column(trackReference)
 
             t.foreignKey(gpxReference, references: gpx, id)
             t.foreignKey(metadataReference, references: metadata, id)
             t.foreignKey(waypointsReference, references: waypoints, id)
+            t.foreignKey(personReference, references: persons, id)
+            t.foreignKey(trackReference, references: tracks, id)
+
+
         })
         
         // Emails Table
         let emails = Table("emails")
         let idEmail = Expression<String?>("id_email")
         let domain = Expression<String?>("domain")
-        let personReference = Expression<Int64>("person_id")
 
         try db.run(emails.create { t in
             t.column(id, primaryKey: .autoincrement)
@@ -316,7 +323,6 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
 
             //GPX table
             let gpxTable = Table("gpx")
-            let id = Expression<Int64>("id")
             let version = Expression<String?>("version")
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
@@ -345,8 +351,6 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
 func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
     //Metadata table
     let metadataTable = Table("metadata")
-    let metadataID = Expression<Int64>("id")
-    let gpx_id = Expression<Int64>("gpx_id")
     let name = Expression<String?>("name")
     let desc = Expression<String?>("desc")
     let time = Expression<Date?>("time")
@@ -444,7 +448,6 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
 
 func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil)throws {
     let linksTable = Table("links")
-    let linkID = Expression<Int64>("id")
     let waypoint_id = Expression<Int64?>("waypoint_id")
     let track_id = Expression<Int64?>("track_id")
     let person_id = Expression<Int64?>("person_id")
