@@ -24,6 +24,7 @@ func createDB(){
         let version = Expression<String?>("version")
         let creator = Expression<String?>("creator")
         let importDate = Expression<Date>("importDate")
+        let fileName = Expression<String?>("filename")
         let gpx_extensions = Expression<String?>("extensions")
 
         try db.run(gpx.create { t in
@@ -31,6 +32,7 @@ func createDB(){
             t.column(version)
             t.column(creator)
             t.column(importDate)
+            t.column(fileName)
             t.column(gpx_extensions)
         })
 
@@ -349,7 +351,7 @@ func createDB(){
     }
 }
 
-func populateFromGPX(gpx: GPXRoot) {
+func populateFromGPX(gpx: GPXRoot, url: URL) {
     dbQueue.async {
         do {
             let path = NSSearchPathForDirectoriesInDomains(
@@ -364,14 +366,17 @@ func populateFromGPX(gpx: GPXRoot) {
             let version = Expression<String?>("version")
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
+            let fileName = Expression<String>("fileName")
             let extensions = Expression<String?>("extensions")
             print(gpx.version, gpx.creator)
             let date = Date()
+            let importFilename = url.lastPathComponent
+            
             //for now, extensions are put as raw data
             let jsonExtension = try jsonEncoder.encode(gpx.extensions)
             let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             try db.transaction {
-                let gpxID = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, extensions <- jsonExtensionString))
+                let gpxID = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, extensions <- jsonExtensionString, fileName <- importFilename))
             
             //Metadata table
             let metadataTable = Table("metadata")

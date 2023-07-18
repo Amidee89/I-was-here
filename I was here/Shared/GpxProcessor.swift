@@ -20,8 +20,7 @@ func processGPXFile(at url: URL) {
     }
 
     if let gpx = GPXParser(withURL: url)?.parsedData() {
-        let gpxData = GPXParser(withURL: url)?.parsedData()
         createDB()
-        populateFromGPX(gpx: gpx)
+        populateFromGPX(gpx: gpx, url: url)
     }
 }
