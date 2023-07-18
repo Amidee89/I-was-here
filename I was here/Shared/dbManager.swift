@@ -237,14 +237,18 @@ func createDB(){
         let emails = Table("emails")
         let idEmail = Expression<String?>("id_email")
         let domain = Expression<String?>("domain")
+        let personReference = Expression<Int64>("person_id")
 
         try db.run(emails.create { t in
             t.column(id, primaryKey: .autoincrement)
             t.column(idEmail)
             t.column(domain)
             t.column(gpxReference)
+            t.column(personReference)
             
             t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(personReference, references: persons, id)
+            
         })
         
         // PointSegments Table
@@ -309,7 +313,6 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 .documentDirectory, .userDomainMask, true
             ).first!
             let db = try Connection("\(path)/iwh.sqlite3")
-            let jsonEncoder = JSONEncoder()
 
             //GPX table
             let gpxTable = Table("gpx")
@@ -322,45 +325,60 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             print(gpx.version, gpx.creator)
             let date = Date()
             let importFilename = url.lastPathComponent
-            
+            let jsonEncoder = JSONEncoder()
+
             //for now, extensions are put as raw data
             let jsonExtension = try jsonEncoder.encode(gpx.extensions)
             let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             try db.transaction {
                 let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, extensions <- jsonExtensionString, fileName <- importFilename))
-            
-            //Metadata table
-            let metadataTable = Table("metadata")
-            let metadataID = Expression<Int64>("id")
-            let gpx_id = Expression<Int64>("gpx_id")
-            let name = Expression<String?>("name")
-            let desc = Expression<String?>("desc")
-            let time = Expression<Date?>("time")
-            let keywords = Expression<String?>("keywords")
-            let extensions = Expression<String?>("extensions")
-                
             if let metadata = gpx.metadata {
-                let jsonExtension = try jsonEncoder.encode(metadata.extensions)
-                let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
-                
-                let metadataInsert = metadataTable.insert(gpx_id <- id, name <- metadata.name, desc <- metadata.desc, time <- metadata.time, keywords <- metadata.keywords, extensions <- jsonExtensionString)
-                let metadataID = try db.run(metadataInsert)
-                // Insert into boundaries
-                if let boundary = metadata.bounds {
-                    try populateBoundariesTable(db: db, boundary: boundary, id: id, metadataID: metadataID)
+                    try populateMetadataTable (db:db, metadata: metadata, gpxID: id)
                 }
-                if let copyright = metadata.copyright{
-                    try populateCopyrightTable (db: db, copyright: copyright, id: id, metadataID: metadataID)
-                }
-            }
-
             }
         } catch {
             print("Database operation failed: \(error)")
         }
     }
 }
-func populateBoundariesTable(db: Connection, boundary: GPXBounds, id: Int64, metadataID: Int64) throws {
+
+func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
+    //Metadata table
+    let metadataTable = Table("metadata")
+    let metadataID = Expression<Int64>("id")
+    let gpx_id = Expression<Int64>("gpx_id")
+    let name = Expression<String?>("name")
+    let desc = Expression<String?>("desc")
+    let time = Expression<Date?>("time")
+    let keywords = Expression<String?>("keywords")
+    let extensions = Expression<String?>("extensions")
+    let jsonEncoder = JSONEncoder()
+    let jsonExtension = try jsonEncoder.encode(metadata.extensions)
+    let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+    
+    let metadataInsert = metadataTable.insert(gpxReference <- id,
+                                              name <- metadata.name,
+                                              desc <- metadata.desc,
+                                              time <- metadata.time,
+                                              keywords <- metadata.keywords,
+                                              extensions <- jsonExtensionString)
+    
+    let id = try db.run(metadataInsert)
+    // Insert into boundaries
+    if let boundary = metadata.bounds {
+        try populateBoundariesTable(db: db, boundary: boundary, gpxID: gpxID, metadataID: id)
+    }
+    if let copyright = metadata.copyright{
+        try populateCopyrightTable (db: db, copyright: copyright, gpxID: gpxID, metadataID: id)
+    }
+    if let person = metadata.author{
+        try populatePersonsTable(db: db, person: person, gpxID: gpxID, metadataID: id)
+    }
+}
+
+
+
+func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, metadataID: Int64) throws {
     let boundariesTable = Table("boundaries")
     let minLat = Expression<Double?>("minLat")
     let minLon = Expression<Double?>("minLon")
@@ -378,7 +396,7 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, id: Int64, met
     _ = try db.run(boundaryInsert)
 }
 
-func populateCopyrightTable(db: Connection, copyright: GPXCopyright, id: Int64, metadataID: Int64) throws {
+func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int64, metadataID: Int64) throws {
     // Copyright Table
     let copyrightTable = Table("copyright")
     let authorCopyright = Expression<String?>("author")
@@ -391,7 +409,7 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, id: Int64, 
     let copyrightYear = dateComponents?.year
     
     let copyrightInsert = copyrightTable.insert(
-        gpxReference <- id,
+        gpxReference <- gpxID,
         metadataReference <- metadataID,
         authorCopyright <- copyright.author,
         year <- copyrightYear,
@@ -400,4 +418,77 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, id: Int64, 
     _ = try db.run(copyrightInsert)
 }
 
+func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metadataID: Int64?) throws {
+    let personsTable = Table("persons")
+    let personName = Expression<String?>("name")
+    
+    var setters: [Setter] = [
+        gpxReference <- gpxID,
+        personName <- person.name
+    ]
+    if let metadataID = metadataID {
+        setters.append(metadataReference <- metadataID)
+    }
+    let insert = personsTable.insert(setters)
+    let personID = try db.run(insert)
+    
+    
+    if let link = person.link{
+        try populateLinkTable(db: db, link: link, gpxID: gpxID, personID: personID)
+    }
+    if let email = person.email{
+        try populateEmailTable(db: db, email: email, gpxID: gpxID, personID: personID)
+    }
+    
+}
 
+func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil)throws {
+    let linksTable = Table("links")
+    let linkID = Expression<Int64>("id")
+    let waypoint_id = Expression<Int64?>("waypoint_id")
+    let track_id = Expression<Int64?>("track_id")
+    let person_id = Expression<Int64?>("person_id")
+    let href = Expression<String?>("href")
+    let text = Expression<String?>("text")
+    
+    var setters: [Setter] = [
+        gpxReference <- gpxID,
+        href <- link.href,
+        text <- link.text,
+        type <- link.mimetype
+    ]
+    
+    if let metadataID = metadataID {
+        setters.append(metadataReference <- metadataID)
+     }
+
+     if let waypointID = waypointID {
+         setters.append(waypoint_id <- waypointID)
+     }
+
+     if let trackID = trackID {
+         setters.append(track_id <- trackID)
+     }
+
+     if let personID = personID {
+         setters.append(person_id <- personID)
+     }
+    let linksInsert = linksTable.insert(setters)
+     _ = try db.run(linksInsert)
+}
+
+func populateEmailTable(db: Connection, email: GPXEmail, gpxID: Int64, personID:Int64) throws {
+    let emailsTable = Table("emails")
+    let idEmail = Expression<String?>("id_email")
+    let domain = Expression<String?>("domain")
+    let personReference = Expression<Int64>("person_id")
+
+    let insert = emailsTable.insert(
+        gpxReference <- gpxID,
+        personReference <- personID,
+        idEmail <- email.emailID,
+        domain <- email.domain
+    )
+    
+    _ = try db.run(insert)
+}
