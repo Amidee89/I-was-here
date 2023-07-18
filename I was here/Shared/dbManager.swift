@@ -331,13 +331,10 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             print(gpx.version, gpx.creator)
             let date = Date()
             let importFilename = url.lastPathComponent
-            let jsonEncoder = JSONEncoder()
 
-            //for now, extensions are put as raw data
-            let jsonExtension = try jsonEncoder.encode(gpx.extensions)
-            let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+
             try db.transaction {
-                let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, extensions <- jsonExtensionString, fileName <- importFilename))
+                let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename))
             if let metadata = gpx.metadata {
                     try populateMetadataTable (db:db, metadata: metadata, gpxID: id)
                 }
