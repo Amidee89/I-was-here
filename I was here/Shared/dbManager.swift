@@ -329,16 +329,15 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             let importDate = Expression<Date>("importDate")
             let fileName = Expression<String>("fileName")
             let extensions = Expression<String?>("extensions")
-            print(gpx.version, gpx.creator)
             let date = Date()
             let importFilename = url.lastPathComponent
+            print("started: ", importFilename)
             
             var jsonExtensionString: String? = nil
             if let extensions = gpx.extensions {
                 let jsonEncoder = JSONEncoder()
                 let jsonExtension = try jsonEncoder.encode(extensions)
                 jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
-                print(jsonExtensionString)
             }
             
             try db.transaction {
@@ -380,7 +379,8 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
                                               extensions <- jsonExtensionString)
     
     let id = try db.run(metadataInsert)
-    // Insert into boundaries
+    
+    //linked tables
     if let boundary = metadata.bounds {
         try populateBoundariesTable(db: db, boundary: boundary, gpxID: gpxID, metadataID: id)
     }
@@ -389,6 +389,10 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
     }
     if let person = metadata.author{
         try populatePersonsTable(db: db, person: person, gpxID: gpxID, metadataID: id)
+    }
+    for link in metadata.links{
+        print(link)
+        try populateLinkTable(db: db, link: link, gpxID: gpxID, metadataID: id)
     }
 }
 
