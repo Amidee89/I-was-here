@@ -22,7 +22,7 @@ let time = Expression<Date?>("time")
 let cmt = Expression<String?>("cmt")
 let desc = Expression<String?>("desc")
 let src = Expression<String?>("src")
-let number = Expression<Int>("number")
+let number = Expression<Int?>("number")
 let type = Expression<String?>("type")
 
 let ele = Expression<Double?>("ele")
@@ -164,19 +164,6 @@ func createDB(){
             t.foreignKey(gpxReference, references: gpx, idColumn)
             t.foreignKey(wptTrackSegmentReference, references: tracksegments, idColumn)
             t.foreignKey(wptRouteReference, references: routes, idColumn)
-
-        })
-
-        
-        // Extensions Table
-        let extensions = Table("extensions")
-        let raw = Expression<String?>("raw")
-        try db.run(extensions.create { t in
-            t.column(idColumn, primaryKey: .autoincrement)
-            t.column(raw)
-            t.column(gpxReference)
-            
-            t.foreignKey(gpxReference, references: gpx, idColumn)
 
         })
 
@@ -327,7 +314,6 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
             let fileName = Expression<String>("fileName")
-            let extensions = Expression<String?>("extensions")
             let date = Date()
             let importFilename = url.lastPathComponent
             print("started: ", importFilename)
@@ -348,15 +334,36 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 if let metadata = gpx.metadata {
                         try populateMetadataTable (db:db, metadata: metadata, gpxID: receivedId)
                     }
-                
+                for track in gpx.tracks{
+                        try populateTracksTable (db:db, track: track, gpxID: receivedId)
+                }
             }
-            
         } catch {
             print("Database operation failed: \(error)")
         }
     }
 }
 
+func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
+    let tracksTable = Table("tracks")
+    let jsonEncoder = JSONEncoder()
+    let jsonExtension = try jsonEncoder.encode(track.extensions)
+    let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+    print("number",track.number)
+    let tracksInsert = tracksTable.insert(gpxReference <- gpxID,
+                                          name <- track.name,
+                                          cmt <- track.comment,
+                                          desc <- track.desc,
+                                          src <- track.source,
+                                          number <- track.number,
+                                          type <- track.type,
+                                          gpxExtensionsColumn <- jsonExtensionString)
+    
+    let id = try db.run(tracksInsert)
+    for link in track.links{
+        try populateLinkTable(db: db, link: link, gpxID: gpxID, trackID: id)
+    }
+}
 
 func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
     //Metadata table
@@ -370,7 +377,7 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
     let jsonExtension = try jsonEncoder.encode(metadata.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
     
-    let metadataInsert = metadataTable.insert(gpxReference <- idColumn,
+    let metadataInsert = metadataTable.insert(gpxReference <- gpxID,
                                               name <- metadata.name,
                                               desc <- metadata.desc,
                                               time <- metadata.time,
@@ -395,8 +402,6 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
     }
 }
 
-
-
 func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, metadataID: Int64) throws {
     let boundariesTable = Table("boundaries")
     let minLat = Expression<Double?>("minLat")
@@ -405,7 +410,7 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, 
     let maxLon = Expression<Double?>("maxLon")
     
     let boundaryInsert = boundariesTable.insert(
-        gpxReference <- idColumn,
+        gpxReference <- gpxID,
         metadataReference <- metadataID,
         minLat <- boundary.minLatitude,
         minLon <- boundary.minLongitude,
