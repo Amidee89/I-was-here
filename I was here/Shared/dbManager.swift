@@ -10,9 +10,9 @@ import SQLite
 import CoreGPX
 let dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
 
-let id = Expression<Int64>("id")
+let idColumn = Expression<Int64>("id")
 let gpxReference = Expression<Int64>("gpx_id")
-let gpxExtensions = Expression<String?>("extensions")
+let gpxExtensionsColumn = Expression<String?>("extensions")
 let metadataReference = Expression<Int64?>("metadata_id")
 let personReference = Expression<Int64?>("person_id")
 
@@ -43,12 +43,12 @@ func createDB(){
         let fileName = Expression<String?>("filename")
 
         try db.run(gpx.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(version)
             t.column(creator)
             t.column(importDate)
             t.column(fileName)
-            t.column(gpxExtensions)
+            t.column(gpxExtensionsColumn)
         })
 
         // Metadata Table
@@ -56,15 +56,15 @@ func createDB(){
         let keywords = Expression<String?>("keywords")
         
         try db.run(metadata.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(gpxReference)
             t.column(name)
             t.column(desc)
             t.column(time)
             t.column(keywords)
-            t.column(gpxExtensions)
+            t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
 
         })
         
@@ -72,7 +72,7 @@ func createDB(){
         let tracks = Table("tracks")
 
         try db.run(tracks.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(gpxReference)
             t.column(name)
             t.column(cmt)
@@ -80,9 +80,9 @@ func createDB(){
             t.column(src)
             t.column(number)
             t.column(type)
-            t.column(gpxExtensions)
+            t.column(gpxExtensionsColumn)
     
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
 
         })
         
@@ -91,12 +91,12 @@ func createDB(){
         let trackReference = Expression<Int64?>("track_id")
 
         try db.run(tracksegments.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(trackReference)
             t.column(gpxReference)
 
-            t.foreignKey(trackReference, references: tracks, id)
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(trackReference, references: tracks, idColumn)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
         })
         
         // Routes Table
@@ -112,9 +112,9 @@ func createDB(){
             t.column(src)
             t.column(number)
             t.column(type)
-            t.column(gpxExtensions)
+            t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
 
         })
         
@@ -135,7 +135,7 @@ func createDB(){
         let dgpsid = Expression<Double?>("dgpsid")
         
         try db.run(waypoints.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(gpxReference)
             t.column(wptTrackSegmentReference)
             t.column(wptRouteReference)
@@ -159,11 +159,11 @@ func createDB(){
             t.column(pdop)
             t.column(ageofdgpsdata)
             t.column(dgpsid)
-            t.column(gpxExtensions)
+            t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(wptTrackSegmentReference, references: tracksegments, id)
-            t.foreignKey(wptRouteReference, references: routes, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(wptTrackSegmentReference, references: tracksegments, idColumn)
+            t.foreignKey(wptRouteReference, references: routes, idColumn)
 
         })
 
@@ -172,11 +172,11 @@ func createDB(){
         let extensions = Table("extensions")
         let raw = Expression<String?>("raw")
         try db.run(extensions.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(raw)
             t.column(gpxReference)
             
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
 
         })
 
@@ -188,28 +188,28 @@ func createDB(){
         let license = Expression<String?>("license")
         
         try db.run(copyright.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(authorCopyright)
             t.column(year)
             t.column(license)
             t.column(gpxReference)
             t.column(metadataReference)
             
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(metadataReference, references: metadata, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(metadataReference, references: metadata, idColumn)
         })
 
         // Persons Table
         let persons = Table("persons")
      
         try db.run(persons.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(name)
             t.column(gpxReference)
             t.column(metadataReference)
             
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(metadataReference, references: metadata, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(metadataReference, references: metadata, idColumn)
         })
 
         // Links Table
@@ -222,7 +222,7 @@ func createDB(){
         let typeLink = Expression<String?>("type")
         
         try db.run(links.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(href)
             t.column(textLink)
             t.column(typeLink)
@@ -232,11 +232,11 @@ func createDB(){
             t.column(personReference)
             t.column(trackReference)
 
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(metadataReference, references: metadata, id)
-            t.foreignKey(waypointsReference, references: waypoints, id)
-            t.foreignKey(personReference, references: persons, id)
-            t.foreignKey(trackReference, references: tracks, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(metadataReference, references: metadata, idColumn)
+            t.foreignKey(waypointsReference, references: waypoints, idColumn)
+            t.foreignKey(personReference, references: persons, idColumn)
+            t.foreignKey(trackReference, references: tracks, idColumn)
 
 
         })
@@ -247,14 +247,14 @@ func createDB(){
         let domain = Expression<String?>("domain")
 
         try db.run(emails.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(idEmail)
             t.column(domain)
             t.column(gpxReference)
             t.column(personReference)
             
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(personReference, references: persons, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(personReference, references: persons, idColumn)
             
         })
         
@@ -262,9 +262,9 @@ func createDB(){
         let pointsegments = Table("pointsegments")
 
         try db.run(pointsegments.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(gpxReference)
-            t.foreignKey(gpxReference, references: gpx, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
         })
         
         // Points Table
@@ -272,7 +272,7 @@ func createDB(){
         let pointSegmentReference = Expression<Int64>("ptseg_id")
 
         try db.run(points.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(lat)
             t.column(lon)
             t.column(ele)
@@ -280,8 +280,8 @@ func createDB(){
             t.column(gpxReference)
             t.column(pointSegmentReference)
             
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(pointSegmentReference, references: pointsegments, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(pointSegmentReference, references: pointsegments, idColumn)
 
         })
 
@@ -294,7 +294,7 @@ func createDB(){
         let maxLon = Expression<Double?>("maxLon")
         
         try db.run(boundaries.create { t in
-            t.column(id, primaryKey: .autoincrement)
+            t.column(idColumn, primaryKey: .autoincrement)
             t.column(minLat)
             t.column(minLon)
             t.column(maxLat)
@@ -302,8 +302,8 @@ func createDB(){
             t.column(gpxReference)
             t.column(metadataReference)
                        
-            t.foreignKey(gpxReference, references: gpx, id)
-            t.foreignKey(metadataReference, references: metadata, id)
+            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(metadataReference, references: metadata, idColumn)
 
         })
 
@@ -323,6 +323,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
 
             //GPX table
             let gpxTable = Table("gpx")
+            let id: Int64? = nil
             let version = Expression<String?>("version")
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
@@ -331,19 +332,33 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             print(gpx.version, gpx.creator)
             let date = Date()
             let importFilename = url.lastPathComponent
-
-
-            try db.transaction {
-                let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename))
-            if let metadata = gpx.metadata {
-                    try populateMetadataTable (db:db, metadata: metadata, gpxID: id)
-                }
+            
+            var jsonExtensionString: String? = nil
+            if let extensions = gpx.extensions {
+                let jsonEncoder = JSONEncoder()
+                let jsonExtension = try jsonEncoder.encode(extensions)
+                jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+                print(jsonExtensionString)
             }
+            
+            try db.transaction {
+                let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
+            }
+            
+            if let receivedId = id
+            {
+                if let metadata = gpx.metadata {
+                        try populateMetadataTable (db:db, metadata: metadata, gpxID: receivedId)
+                    }
+                
+            }
+            
         } catch {
             print("Database operation failed: \(error)")
         }
     }
 }
+
 
 func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
     //Metadata table
@@ -357,7 +372,7 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
     let jsonExtension = try jsonEncoder.encode(metadata.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
     
-    let metadataInsert = metadataTable.insert(gpxReference <- id,
+    let metadataInsert = metadataTable.insert(gpxReference <- idColumn,
                                               name <- metadata.name,
                                               desc <- metadata.desc,
                                               time <- metadata.time,
@@ -387,7 +402,7 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, 
     let maxLon = Expression<Double?>("maxLon")
     
     let boundaryInsert = boundariesTable.insert(
-        gpxReference <- id,
+        gpxReference <- idColumn,
         metadataReference <- metadataID,
         minLat <- boundary.minLatitude,
         minLon <- boundary.minLongitude,
