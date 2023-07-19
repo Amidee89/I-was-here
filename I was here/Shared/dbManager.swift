@@ -15,6 +15,7 @@ let gpxReference = Expression<Int64>("gpx_id")
 let gpxExtensionsColumn = Expression<String?>("extensions")
 let metadataReference = Expression<Int64?>("metadata_id")
 let personReference = Expression<Int64?>("person_id")
+let trackReference = Expression<Int64?>("track_id")
 
 let name = Expression<String?>("name")
 let time = Expression<Date?>("time")
@@ -88,7 +89,6 @@ func createDB(){
         
         // TrackSegments Table
         let tracksegments = Table("tracksegments")
-        let trackReference = Expression<Int64?>("track_id")
 
         try db.run(tracksegments.create { t in
             t.column(idColumn, primaryKey: .autoincrement)
@@ -215,7 +215,6 @@ func createDB(){
         // Links Table
         let links = Table("links")
         let waypointsReference = Expression<Int64?>("waypoint_id")
-        let tracksReference = Expression<Int64?>("track_id")
         
         let href = Expression<String>("href")
         let textLink = Expression<String?>("text")
@@ -323,7 +322,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
 
             //GPX table
             let gpxTable = Table("gpx")
-            let id: Int64? = nil
+            var id: Int64? = nil
             let version = Expression<String?>("version")
             let creator = Expression<String?>("creator")
             let importDate = Expression<Date>("importDate")
@@ -341,7 +340,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
             }
             
             try db.transaction {
-                let id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
+                id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
             }
             
             if let receivedId = id
@@ -385,13 +384,13 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
         try populateBoundariesTable(db: db, boundary: boundary, gpxID: gpxID, metadataID: id)
     }
     if let copyright = metadata.copyright{
+        print(copyright)
         try populateCopyrightTable (db: db, copyright: copyright, gpxID: gpxID, metadataID: id)
     }
     if let person = metadata.author{
         try populatePersonsTable(db: db, person: person, gpxID: gpxID, metadataID: id)
     }
     for link in metadata.links{
-        print(link)
         try populateLinkTable(db: db, link: link, gpxID: gpxID, metadataID: id)
     }
 }
