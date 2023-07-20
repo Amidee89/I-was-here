@@ -94,6 +94,7 @@ func createDB(){
             t.column(idColumn, primaryKey: .autoincrement)
             t.column(trackReference)
             t.column(gpxReference)
+            t.column(gpxExtensionsColumn)
 
             t.foreignKey(trackReference, references: tracks, idColumn)
             t.foreignKey(gpxReference, references: gpx, idColumn)
@@ -349,7 +350,6 @@ func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
     let jsonEncoder = JSONEncoder()
     let jsonExtension = try jsonEncoder.encode(track.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
-    print("number",track.number)
     let tracksInsert = tracksTable.insert(gpxReference <- gpxID,
                                           name <- track.name,
                                           cmt <- track.comment,
@@ -363,7 +363,27 @@ func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
     for link in track.links{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, trackID: id)
     }
+    for tracksegment in track.segments
+    {
+        try populateTrackSegmentsTable(db: db, segment: tracksegment, gpxID: gpxID, trackID: id)
+    }
+    
+    
 }
+
+func populateTrackSegmentsTable (db: Connection, segment: GPXTrackSegment, gpxID: Int64, trackID: Int64) throws
+{
+    let traksegmentTable = Table("tracksegments")
+    let jsonEncoder = JSONEncoder()
+    let jsonExtension = try jsonEncoder.encode(segment.extensions)
+    let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+    let trackSegmentInsert = traksegmentTable.insert(gpxReference <- gpxID,
+                                          trackReference <- trackID,
+                                          gpxExtensionsColumn <- jsonExtensionString)
+    let id = try db.run(trackSegmentInsert)
+
+}
+
 
 func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
     //Metadata table

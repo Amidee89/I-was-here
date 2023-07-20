@@ -24,4 +24,5 @@ tracksegments -> tracks
 
 WARNING: gpx root can have also waypoints!!!
 WARNING: pointsegments and points are not supported by coreGPX, and as such will be ignored.
+WARNING: track.number is always parsing to nil, contacted coreGPX dev
 to check: extension schema
