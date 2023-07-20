@@ -1,7 +1,7 @@
     gpx: id, version, creator, importDate, extensions
     metadata: id, gpx_id, name, desc, time, keywords,extensions
     tracks: id, gpx_id, name, desc, src, number, type, extensions
-tracksegments: id, gpx_id, track_id 
+tracksegments: id, gpx_id, track_id, extensions
 waypoints: id, gpx_id, trkseg_id, route_id, ele, time, lat, lon, magvar, geoidheight, wptname, cmt, wptdesc, src, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, wptextensions 
 routes: id, gpx_id, name, cmt, desc, src, number, type, extensions
     extensions: id, gpx_id, raw
@@ -24,5 +24,5 @@ tracksegments -> tracks
 
 WARNING: gpx root can have also waypoints!!!
 WARNING: pointsegments and points are not supported by coreGPX, and as such will be ignored.
-WARNING: track.number is always parsing to nil, contacted coreGPX dev
+WARNING: track.number and waypoint.ageofdgpsdata are always parsing to nil, contacted coreGPX dev
 to check: extension schema

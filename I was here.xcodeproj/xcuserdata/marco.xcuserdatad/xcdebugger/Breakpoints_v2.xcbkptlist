@@ -3,4 +3,54 @@
    uuid = "F91CF0C9-E90E-4F00-9F19-9FBF36EFAEB8"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "399"
+            endingLineNumber = "399"
+            landmarkName = "populateWaypointsTable(db:waypoints:gpxID:tracksegmentID:routeID:)"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1 - c9a21e8a57e62605"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () throws -&gt; () in I_was_here.populateWaypointsTable(db: SQLite.Connection, waypoints: Swift.Array&lt;CoreGPX.GPXWaypoint&gt;, gpxID: Swift.Int64, tracksegmentID: Swift.Optional&lt;Swift.Int64&gt;, routeID: Swift.Optional&lt;Swift.Int64&gt;) throws -&gt; ()"
+                  moduleName = "I was here"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/marco/Documents/GitHub/Iwashere/I%20was%20here/I%20was%20here/Shared/dbManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "399"
+                  endingLineNumber = "399"
+                  offsetFromSymbolStart = "3308">
+               </Location>
+               <Location
+                  uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1 - c9a21e8a57e62605"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () throws -&gt; () in I_was_here.populateWaypointsTable(db: SQLite.Connection, waypoints: Swift.Array&lt;CoreGPX.GPXWaypoint&gt;, gpxID: Swift.Int64, tracksegmentID: Swift.Optional&lt;Swift.Int64&gt;, routeID: Swift.Optional&lt;Swift.Int64&gt;) throws -&gt; ()"
+                  moduleName = "I was here"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/marco/Documents/GitHub/Iwashere/I%20was%20here/I%20was%20here/Shared/dbManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "399"
+                  endingLineNumber = "399"
+                  offsetFromSymbolStart = "3292">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>
