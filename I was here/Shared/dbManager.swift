@@ -97,11 +97,9 @@ func createDB(){
             .documentDirectory, .userDomainMask, true
         ).first!
         let db = try Connection("\(path)/iwh.sqlite3")
-        print(db.description)
+        print("creating: ", db.description)
         // GPX Table
-        let gpx = Table("gpx")
-
-        try db.run(gpx.create { t in
+        try db.run(gpxTable.create { t in
             t.column(idColumn, primaryKey: .autoincrement)
             t.column(version)
             t.column(creator)
@@ -120,7 +118,7 @@ func createDB(){
             t.column(keywords)
             t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
         })
         
         // Tracks Table
@@ -135,7 +133,7 @@ func createDB(){
             t.column(type)
             t.column(gpxExtensionsColumn)
     
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
         })
         
         // TrackSegments Table
@@ -146,7 +144,7 @@ func createDB(){
             t.column(gpxExtensionsColumn)
 
             t.foreignKey(trackReference, references: tracksTable, idColumn)
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
         })
         
         // Routes Table
@@ -161,7 +159,7 @@ func createDB(){
             t.column(type)
             t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
         })
         
         // Waypoints Table
@@ -192,7 +190,7 @@ func createDB(){
             t.column(dgpsid)
             t.column(gpxExtensionsColumn)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(trackSegmentReference, references: tracksegmentsTable, idColumn)
             t.foreignKey(routeReference, references: routesTable, idColumn)
         })
@@ -206,7 +204,7 @@ func createDB(){
             t.column(gpxReference)
             t.column(metadataReference)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(metadataReference, references: metadataTable, idColumn)
         })
 
@@ -217,7 +215,7 @@ func createDB(){
             t.column(gpxReference)
             t.column(metadataReference)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(metadataReference, references: metadataTable, idColumn)
         })
 
@@ -233,13 +231,15 @@ func createDB(){
             t.column(waypointsReference)
             t.column(personReference)
             t.column(trackReference)
+            t.column(routeReference)
 
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(metadataReference, references: metadataTable, idColumn)
             t.foreignKey(waypointsReference, references: waypointsTable, idColumn)
             t.foreignKey(personReference, references: personsTable, idColumn)
             t.foreignKey(trackReference, references: tracksTable, idColumn)
-
+            t.foreignKey(routeReference, references: routesTable, idColumn)
+            
 
         })
         
@@ -251,7 +251,7 @@ func createDB(){
             t.column(gpxReference)
             t.column(personReference)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(personReference, references: personsTable, idColumn)
             
         })
@@ -260,7 +260,7 @@ func createDB(){
         try db.run(pointsegments.create { t in
             t.column(idColumn, primaryKey: .autoincrement)
             t.column(gpxReference)
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
         })
         
         // Points Table
@@ -273,7 +273,7 @@ func createDB(){
             t.column(gpxReference)
             t.column(pointSegmentReference)
             
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(pointSegmentReference, references: pointsegments, idColumn)
         })
 
@@ -287,7 +287,7 @@ func createDB(){
             t.column(gpxReference)
             t.column(metadataReference)
                        
-            t.foreignKey(gpxReference, references: gpx, idColumn)
+            t.foreignKey(gpxReference, references: gpxTable, idColumn)
             t.foreignKey(metadataReference, references: metadataTable, idColumn)
         })
 
@@ -304,7 +304,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 .documentDirectory, .userDomainMask, true
             ).first!
             let importFilename = url.lastPathComponent
-            print("started: ", importFilename)
+            print("started importing: ", importFilename)
             
             let db = try Connection("\(path)/iwh.sqlite3")
             //GPX table
@@ -330,7 +330,13 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 for track in gpx.tracks{
                         try populateTracksTable (db:db, track: track, gpxID: receivedId)
                 }
+                for route in gpx.routes{
+                        try populateRoutesTable (db:db, route: route, gpxID: receivedId)
+                }
             }
+            
+            print("finished importing: ", importFilename)
+
         } catch {
             print("Database operation failed: \(error)")
         }
@@ -358,8 +364,6 @@ func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
     {
         try populateTrackSegmentsTable(db: db, segment: tracksegment, gpxID: gpxID, trackID: id)
     }
-    
-    
 }
 
 func populateTrackSegmentsTable (db: Connection, segment: GPXTrackSegment, gpxID: Int64, trackID: Int64) throws
@@ -374,6 +378,28 @@ func populateTrackSegmentsTable (db: Connection, segment: GPXTrackSegment, gpxID
     try populateWaypointsTable(db: db, waypoints: segment.points, gpxID: gpxID, tracksegmentID: id)
 }
 
+func populateRoutesTable (db: Connection, route: GPXRoute, gpxID: Int64) throws{
+    let jsonEncoder = JSONEncoder()
+    let jsonExtension = try jsonEncoder.encode(route.extensions)
+    let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+    let routesInsert = routesTable.insert(gpxReference <- gpxID,
+                                          name <- route.name,
+                                          cmt <- route.comment,
+                                          desc <- route.desc,
+                                          src <- route.source,
+                                          number <- route.number,
+                                          type <- route.type,
+                                          gpxExtensionsColumn <- jsonExtensionString)
+    
+    let id = try db.run(routesInsert)
+    for link in route.links{
+        try populateLinkTable(db: db, link: link, gpxID: gpxID, routeID: id)
+    }
+    try populateWaypointsTable(db: db, waypoints: route.points, gpxID: gpxID, routeID: id)
+
+}
+
+
 func populateWaypointsTable(db: Connection, waypoints: [GPXWaypoint], gpxID: Int64, tracksegmentID: Int64? = nil, routeID: Int64? = nil) throws {
 
     try db.transaction {
@@ -385,6 +411,7 @@ func populateWaypointsTable(db: Connection, waypoints: [GPXWaypoint], gpxID: Int
             let waypointInsert = waypointsTable.insert(
                 gpxReference <- gpxID,
                 trackSegmentReference <- tracksegmentID,
+                routeReference <- routeID,
                 ele <- waypoint.elevation,
                 time <- waypoint.time,
                 lat <- waypoint.latitude,
@@ -431,7 +458,6 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
         try populateBoundariesTable(db: db, boundary: boundary, gpxID: gpxID, metadataID: id)
     }
     if let copyright = metadata.copyright{
-        print(copyright)
         try populateCopyrightTable (db: db, copyright: copyright, gpxID: gpxID, metadataID: id)
     }
     if let person = metadata.author{
@@ -472,19 +498,15 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int6
     _ = try db.run(copyrightInsert)
 }
 
-func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metadataID: Int64?) throws {
+func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metadataID: Int64? = nil) throws {
     
-    var setters: [Setter] = [
+    let personInsert = personsTable.insert(
         gpxReference <- gpxID,
-        name <- person.name
-    ]
-    if let metadataID = metadataID {
-        setters.append(metadataReference <- metadataID)
-    }
-    let insert = personsTable.insert(setters)
-    let personID = try db.run(insert)
-    
-    
+        name <- person.name,
+        metadataReference <- metadataID
+    )
+    let personID = try db.run(personInsert)
+        
     if let link = person.link{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, personID: personID)
     }
@@ -494,30 +516,18 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
     
 }
 
-func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil)throws {
-    var setters: [Setter] = [
+func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil, routeID: Int64? = nil)throws {
+    let linksInsert = linksTable.insert(
         gpxReference <- gpxID,
         href <- link.href,
         text <- link.text,
-        type <- link.mimetype
-    ]
-    
-    if let metadataID = metadataID {
-        setters.append(metadataReference <- metadataID)
-     }
+        type <- link.mimetype,
+        metadataReference <- metadataID,
+        trackReference <- trackID,
+        personReference <- personID,
+        routeReference <- routeID
+    )
 
-     if let waypointID = waypointID {
-         setters.append(waypointsReference <- waypointID)
-     }
-
-     if let trackID = trackID {
-         setters.append(trackReference <- trackID)
-     }
-
-     if let personID = personID {
-         setters.append(personReference <- personID)
-     }
-    let linksInsert = linksTable.insert(setters)
      _ = try db.run(linksInsert)
 }
 

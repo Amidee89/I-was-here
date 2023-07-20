@@ -1,26 +1,25 @@
-    gpx: id, version, creator, importDate, extensions
-    metadata: id, gpx_id, name, desc, time, keywords,extensions
-    tracks: id, gpx_id, name, desc, src, number, type, extensions
+gpx: id, version, creator, importDate, extensions
+metadata: id, gpx_id, name, desc, time, keywords,extensions
+tracks: id, gpx_id, name, desc, src, number, type, extensions
 tracksegments: id, gpx_id, track_id, extensions
 waypoints: id, gpx_id, trkseg_id, route_id, ele, time, lat, lon, magvar, geoidheight, wptname, cmt, wptdesc, src, sym, type, fix, sat, hdop, vdop, pdop, ageofdgpsdata, dgpsid, wptextensions 
 routes: id, gpx_id, name, cmt, desc, src, number, type, extensions
-    extensions: id, gpx_id, raw
-    copyright: id, gpx_id, metadata_id, author, year, license
-    persons: id, gpx_id, metadata_id, name
-    links: id, gpx_id, metadata_id, waypoint_id, person_id, href, text, type, 
-    emails: id, gpx_id, domain, person_id 
-    pointsegments: id, gpx_id
-    points: id, ptseg_id, lat, lon, ele, time, 
-    boundaries: id, gpx_id, metadata_id minLat,minLon,maxLat,maxLon
+copyright: id, gpx_id, metadata_id, author, year, license
+persons: id, gpx_id, metadata_id, name
+links: id, gpx_id, metadata_id, waypoint_id, person_id, href, text, type, 
+emails: id, gpx_id, domain, person_id 
+pointsegments: id, gpx_id
+points: id, ptseg_id, lat, lon, ele, time, 
+boundaries: id, gpx_id, metadata_id minLat,minLon,maxLat,maxLon
 
 
 foreign keys:
-    links -> metadata, waypoints, tracks, persons
-    boundaries -> metadata
+links -> metadata, waypoints, tracks, persons, routes
+boundaries -> metadata
 waypoints -> routes, tracksegments
 tracksegments -> tracks
-    person -> metadata
-    copyright -> metadata
+person -> metadata
+copyright -> metadata
 
 WARNING: gpx root can have also waypoints!!!
 WARNING: pointsegments and points are not supported by coreGPX, and as such will be ignored.

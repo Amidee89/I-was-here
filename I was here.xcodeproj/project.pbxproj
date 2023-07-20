@@ -52,6 +52,7 @@
 		A9E87F142A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I_was_hereUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		A9E87F2C2A62BDD100116428 /* I-was-here-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "I-was-here-Info.plist"; sourceTree = SOURCE_ROOT; };
 		A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRepresentableView.swift; sourceTree = "<group>"; };
+		A9E964E92A6967740022C9A2 /* testgpx.gpx */ = {isa = PBXFileReference; lastKnownFileType = text; path = testgpx.gpx; sourceTree = "<group>"; };
 		A9EAE8E02A63227900604818 /* GpxProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GpxProcessor.swift; sourceTree = "<group>"; };
 		A9EAE8E52A633A6B00604818 /* dbManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dbManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -106,6 +107,7 @@
 		A9E87EF52A607E1A00116428 /* I was here */ = {
 			isa = PBXGroup;
 			children = (
+				A9E964E92A6967740022C9A2 /* testgpx.gpx */,
 				A9E87F302A62C33700116428 /* Shared */,
 				A9E87F2C2A62BDD100116428 /* I-was-here-Info.plist */,
 				A9E87EF62A607E1A00116428 /* I_was_hereApp.swift */,
