@@ -350,4 +350,49 @@
 </rtept>
 </rte>
 
+<wpt lat="60.46713" lon="24.77880">
+<ele>82</ele>
+<magvar>0</magvar>
+<time>2023-07-18T05:01:08-07:00</time>
+<geoidheight>.01</geoidheight>
+<name>gpx root waypoint 1 name</name>
+<cmt>gpx root waypoint 1 comment</cmt>
+<desc>gpx root waypoint 1 description</desc>
+<src>gpx root waypoint 1 source</src>
+<link href="www.gpxrootwaypoint1link.com"> <text>gpx root waypoint 1 link</text> <type>gpx root waypoint 1 link 1 mimetype</type></link>
+<link href="www.gpxrootwaypoint1linklink2.com"> <text>gpx root waypoint 1 link 2</text> <type>gpx root waypoint 1  link 2 mimetype2</type></link>
+<sym>gpx root waypoint 1 symbol</sym>
+<type>gpx root waypoint 1 type</type>
+<fix>2d</fix>
+<sat>5</sat>
+<hdop>3</hdop>
+<vdop>4</vdop>
+<pdop>5</pdop>
+<ageofdgpsdata>10</ageofdgpsdata>
+<dgpsid>10</dgpsid>
+<extensions><gpxrootwaypoint1extensionparent>gpx root waypoint 1 extension</gpxrootwaypoint1extensionparent></extensions>
+</wpt>
+<wpt lat="60.36713" lon="24.77880">
+<ele>82</ele>
+<magvar>0</magvar>
+<time>2023-07-18T05:01:08-07:00</time>
+<geoidheight>.01</geoidheight>
+<name>gpx root waypoint 2 name</name>
+<cmt>gpx root waypoint 2 comment</cmt>
+<desc>gpx root waypoint 2 description</desc>
+<src>gpx root waypoint 2 source</src>
+<link href="www.gpxrootwaypoint2link.com"> <text>gpx root waypoint 2 link</text> <type>gpx root waypoint 2 link 1 mimetype</type></link>
+<link href="www.gpxrootwaypoint2linklink2.com"> <text>gpx root waypoint 2 link 2</text> <type>gpx root waypoint 2  link 2 mimetype2</type></link>
+<sym>gpx root waypoint 2 symbol</sym>
+<type>gpx root waypoint 2 type</type>
+<fix>2d</fix>
+<sat>5</sat>
+<hdop>3</hdop>
+<vdop>4</vdop>
+<pdop>5</pdop>
+<ageofdgpsdata>10</ageofdgpsdata>
+<dgpsid>10</dgpsid>
+<extensions><gpxrootwaypoint2extensionparent>gpx root waypoint 2 extension</gpxrootwaypoint2extensionparent></extensions>
+</wpt>
+
 </gpx>

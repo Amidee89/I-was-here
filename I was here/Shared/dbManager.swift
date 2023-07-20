@@ -8,8 +8,25 @@
 import Foundation
 import SQLite
 import CoreGPX
-let dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
+var dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
+let path = NSSearchPathForDirectoriesInDomains(
+    .documentDirectory, .userDomainMask, true
+).first!
+let dbFilePath = "\(path)/iwh.sqlite3"
+var db : Connection? = nil
 
+func setupDatabase(){
+    let fileManager = FileManager.default
+    if !fileManager.fileExists(atPath: dbFilePath) {
+        createDB()
+    }
+    
+    do {
+        db = try Connection(dbFilePath)
+    } catch {
+        print("Unable to open database")
+    }
+}
 
 //Tables
 let gpxTable = Table("gpx")
@@ -298,6 +315,7 @@ func createDB(){
 }
 
 func populateFromGPX(gpx: GPXRoot, url: URL) {
+    setupDatabase()
     dbQueue.async {
         do {
             let path = NSSearchPathForDirectoriesInDomains(
@@ -317,7 +335,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 let jsonExtension = try jsonEncoder.encode(extensions)
                 jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             }
-            
+            print("gpx insert run")
             try db.transaction {
                 id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
             }
@@ -333,6 +351,7 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 for route in gpx.routes{
                         try populateRoutesTable (db:db, route: route, gpxID: receivedId)
                 }
+                try populateWaypointsTable(db: db, waypoints: gpx.waypoints, gpxID: receivedId)
             }
             
             print("finished importing: ", importFilename)
@@ -355,7 +374,7 @@ func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
                                           number <- track.number,
                                           type <- track.type,
                                           gpxExtensionsColumn <- jsonExtensionString)
-    
+    print("track insert run")
     let id = try db.run(tracksInsert)
     for link in track.links{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, trackID: id)
@@ -371,6 +390,7 @@ func populateTrackSegmentsTable (db: Connection, segment: GPXTrackSegment, gpxID
     let jsonEncoder = JSONEncoder()
     let jsonExtension = try jsonEncoder.encode(segment.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+    print("track segment insert run")
     let trackSegmentInsert = tracksegmentsTable.insert(gpxReference <- gpxID,
                                           trackReference <- trackID,
                                           gpxExtensionsColumn <- jsonExtensionString)
@@ -391,6 +411,8 @@ func populateRoutesTable (db: Connection, route: GPXRoute, gpxID: Int64) throws{
                                           type <- route.type,
                                           gpxExtensionsColumn <- jsonExtensionString)
     
+    print("routes insert run")
+
     let id = try db.run(routesInsert)
     for link in route.links{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, routeID: id)
@@ -433,6 +455,8 @@ func populateWaypointsTable(db: Connection, waypoints: [GPXWaypoint], gpxID: Int
                 dgpsid <- waypoint.DGPSid,
                 gpxExtensionsColumn <- jsonExtensionString
             )
+            print("waypoint insert run")
+
             _ = try db.run(waypointInsert)
         }
     }
@@ -450,7 +474,8 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
                                               time <- metadata.time,
                                               keywords <- metadata.keywords,
                                               gpxExtensionsColumn <- jsonExtensionString)
-    
+    print("metadata insert run")
+
     let id = try db.run(metadataInsert)
     
     //linked tables
@@ -478,6 +503,8 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, 
         maxLat <- boundary.maxLatitude,
         maxLon <- boundary.maxLongitude
     )
+    print("bounds insert run")
+
     _ = try db.run(boundaryInsert)
 }
 
@@ -495,6 +522,8 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int6
         year <- copyrightYear,
         license <- copyright.license
     )
+    print("copyright insert run")
+
     _ = try db.run(copyrightInsert)
 }
 
@@ -506,7 +535,8 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
         metadataReference <- metadataID
     )
     let personID = try db.run(personInsert)
-        
+    print("person insert run")
+
     if let link = person.link{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, personID: personID)
     }
@@ -527,7 +557,7 @@ func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: 
         personReference <- personID,
         routeReference <- routeID
     )
-
+    print("link insert run")
      _ = try db.run(linksInsert)
 }
 
@@ -538,6 +568,7 @@ func populateEmailTable(db: Connection, email: GPXEmail, gpxID: Int64, personID:
         idEmail <- email.emailID,
         domain <- email.domain
     )
-    
+    print("email insert run")
+
     _ = try db.run(insert)
 }
