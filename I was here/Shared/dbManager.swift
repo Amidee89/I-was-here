@@ -8,7 +8,8 @@
 import Foundation
 import SQLite
 import CoreGPX
-var dbQueue = DispatchQueue(label: "dbQueue", qos: .background)
+
+var dbQueue = DispatchQueue(label: "iamhere.dbQueue", qos: .userInitiated)
 let path = NSSearchPathForDirectoriesInDomains(
     .documentDirectory, .userDomainMask, true
 ).first!
@@ -314,16 +315,35 @@ func createDB(){
     }
 }
 
-func populateFromGPX(gpx: GPXRoot, url: URL) {
+func processGPXFile(at url: URL) {
+    var fileSizeCalculation : NSNumber? = nil
+    do {
+        let fileAttributes = try FileManager.default.attributesOfItem(atPath: url.path)
+        if let fileSize = fileAttributes[FileAttributeKey.size] as? NSNumber {
+            print("File size: \(fileSize.intValue) bytes")
+            fileSizeCalculation = fileSize
+        }
+    } catch {
+        print("Failed to get file size for \(url.path)")
+    }
+
+    if let gpx = GPXParser(withURL: url)?.parsedData() {
+        populateFromGPX(gpx: gpx, url: url, fileSize: fileSizeCalculation!)
+    
+    }
+}
+
+
+func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
     setupDatabase()
     dbQueue.async {
         do {
+            let startTime = CFAbsoluteTimeGetCurrent()
             let path = NSSearchPathForDirectoriesInDomains(
                 .documentDirectory, .userDomainMask, true
             ).first!
             let importFilename = url.lastPathComponent
             print("started importing: ", importFilename)
-            
             let db = try Connection("\(path)/iwh.sqlite3")
             //GPX table
             var id: Int64? = nil
@@ -345,8 +365,16 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 if let metadata = gpx.metadata {
                         try populateMetadataTable (db:db, metadata: metadata, gpxID: receivedId)
                     }
-                for track in gpx.tracks{
-                        try populateTracksTable (db:db, track: track, gpxID: receivedId)
+                let concurrentQueue = DispatchQueue(label: "concurrentQueue", attributes: .concurrent)
+                let tracks = gpx.tracks
+                DispatchQueue.global(qos: .userInitiated).async {
+                    DispatchQueue.concurrentPerform(iterations: tracks.count) { index in
+                        do {
+                            try populateTracksTable(db: db, track: tracks[index], gpxID: receivedId)
+                        } catch {
+                            print("Failed to populate track: \(error)")
+                        }
+                    }
                 }
                 for route in gpx.routes{
                         try populateRoutesTable (db:db, route: route, gpxID: receivedId)
@@ -354,15 +382,20 @@ func populateFromGPX(gpx: GPXRoot, url: URL) {
                 try populateWaypointsTable(db: db, waypoints: gpx.waypoints, gpxID: receivedId)
             }
             
-            print("finished importing: ", importFilename)
-
+            let endTime = CFAbsoluteTimeGetCurrent()
+            let executionTime = (endTime - startTime) * 1000
+            print("finished importing: ", importFilename, "took ", executionTime, "ms")
+            print("ms per byte: ", (executionTime/Double(fileSize)) )
         } catch {
             print("Database operation failed: \(error)")
         }
+
     }
+
 }
 
 func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
+    let startTime = CFAbsoluteTimeGetCurrent()
     let jsonEncoder = JSONEncoder()
     let jsonExtension = try jsonEncoder.encode(track.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
@@ -374,7 +407,7 @@ func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
                                           number <- track.number,
                                           type <- track.type,
                                           gpxExtensionsColumn <- jsonExtensionString)
-    print("track insert run")
+    //print("tracks insert")
     let id = try db.run(tracksInsert)
     for link in track.links{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, trackID: id)
@@ -390,10 +423,10 @@ func populateTrackSegmentsTable (db: Connection, segment: GPXTrackSegment, gpxID
     let jsonEncoder = JSONEncoder()
     let jsonExtension = try jsonEncoder.encode(segment.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
-    print("track segment insert run")
     let trackSegmentInsert = tracksegmentsTable.insert(gpxReference <- gpxID,
                                           trackReference <- trackID,
                                           gpxExtensionsColumn <- jsonExtensionString)
+    //print("track segment insert")
     let id = try db.run(trackSegmentInsert)
     try populateWaypointsTable(db: db, waypoints: segment.points, gpxID: gpxID, tracksegmentID: id)
 }
@@ -410,9 +443,7 @@ func populateRoutesTable (db: Connection, route: GPXRoute, gpxID: Int64) throws{
                                           number <- route.number,
                                           type <- route.type,
                                           gpxExtensionsColumn <- jsonExtensionString)
-    
-    print("routes insert run")
-
+    //print("routes insert")
     let id = try db.run(routesInsert)
     for link in route.links{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, routeID: id)
@@ -423,43 +454,45 @@ func populateRoutesTable (db: Connection, route: GPXRoute, gpxID: Int64) throws{
 
 
 func populateWaypointsTable(db: Connection, waypoints: [GPXWaypoint], gpxID: Int64, tracksegmentID: Int64? = nil, routeID: Int64? = nil) throws {
-
-    try db.transaction {
-        for waypoint in waypoints {
-            let jsonEncoder = JSONEncoder()
-            let jsonExtension = try jsonEncoder.encode(waypoint.extensions)
-            let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
-            
-            let waypointInsert = waypointsTable.insert(
-                gpxReference <- gpxID,
-                trackSegmentReference <- tracksegmentID,
-                routeReference <- routeID,
-                ele <- waypoint.elevation,
-                time <- waypoint.time,
-                lat <- waypoint.latitude,
-                lon <- waypoint.longitude,
-                magvar <- waypoint.magneticVariation,
-                geoidheight <- waypoint.geoidHeight,
-                name <- waypoint.name,
-                cmt <- waypoint.comment,
-                desc <- waypoint.desc,
-                src <- waypoint.source,
-                sym <- waypoint.symbol,
-                type <- waypoint.type,
-                fix <- waypoint.fix?.rawValue,
-                sat <- waypoint.satellites,
-                hdop <- waypoint.horizontalDilution,
-                vdop <- waypoint.verticalDilution,
-                pdop <- waypoint.positionDilution,
-                ageofdgpsdata <- waypoint.ageofDGPSData,
-                dgpsid <- waypoint.DGPSid,
-                gpxExtensionsColumn <- jsonExtensionString
-            )
-            print("waypoint insert run")
-
-            _ = try db.run(waypointInsert)
-        }
+    if waypoints.isEmpty{
+        return
     }
+    try db.transaction {
+        var rows: [[Setter]] = []
+               for waypoint in waypoints {
+                   let jsonEncoder = JSONEncoder()
+                   let jsonExtension = try jsonEncoder.encode(waypoint.extensions)
+                   let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
+                   let setters: [Setter] = [
+                       gpxReference <- gpxID,
+                       trackSegmentReference <- tracksegmentID,
+                       routeReference <- routeID,
+                       ele <- waypoint.elevation,
+                       time <- waypoint.time,
+                       lat <- waypoint.latitude,
+                       lon <- waypoint.longitude,
+                       magvar <- waypoint.magneticVariation,
+                       geoidheight <- waypoint.geoidHeight,
+                       name <- waypoint.name,
+                       cmt <- waypoint.comment,
+                       desc <- waypoint.desc,
+                       src <- waypoint.source,
+                       sym <- waypoint.symbol,
+                       type <- waypoint.type,
+                       fix <- waypoint.fix?.rawValue,
+                       sat <- waypoint.satellites,
+                       hdop <- waypoint.horizontalDilution,
+                       vdop <- waypoint.verticalDilution,
+                       pdop <- waypoint.positionDilution,
+                       ageofdgpsdata <- waypoint.ageofDGPSData,
+                       dgpsid <- waypoint.DGPSid,
+                       gpxExtensionsColumn <- jsonExtensionString
+                   ]
+                   rows.append(setters)
+               }
+               // print("waypoint insert")
+               _ = try db.run(waypointsTable.insertMany(rows))
+        }
 }
 
 func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64) throws{
@@ -474,8 +507,6 @@ func populateMetadataTable (db: Connection, metadata: GPXMetadata, gpxID: Int64)
                                               time <- metadata.time,
                                               keywords <- metadata.keywords,
                                               gpxExtensionsColumn <- jsonExtensionString)
-    print("metadata insert run")
-
     let id = try db.run(metadataInsert)
     
     //linked tables
@@ -503,7 +534,7 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, 
         maxLat <- boundary.maxLatitude,
         maxLon <- boundary.maxLongitude
     )
-    print("bounds insert run")
+    print("bounds insert")
 
     _ = try db.run(boundaryInsert)
 }
@@ -514,7 +545,8 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int6
     let calendar = Calendar.current
     let dateComponents = copyright.year.map { calendar.dateComponents([.year], from: $0) }
     let copyrightYear = dateComponents?.year
-    
+    print("copyright insert")
+
     let copyrightInsert = copyrightTable.insert(
         gpxReference <- gpxID,
         metadataReference <- metadataID,
@@ -522,8 +554,6 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int6
         year <- copyrightYear,
         license <- copyright.license
     )
-    print("copyright insert run")
-
     _ = try db.run(copyrightInsert)
 }
 
@@ -534,9 +564,10 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
         name <- person.name,
         metadataReference <- metadataID
     )
-    let personID = try db.run(personInsert)
-    print("person insert run")
+    print("person insert")
 
+    let personID = try db.run(personInsert)
+    
     if let link = person.link{
         try populateLinkTable(db: db, link: link, gpxID: gpxID, personID: personID)
     }
@@ -547,6 +578,8 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
 }
 
 func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil, routeID: Int64? = nil)throws {
+    print("link insert")
+
     let linksInsert = linksTable.insert(
         gpxReference <- gpxID,
         href <- link.href,
@@ -557,18 +590,17 @@ func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: 
         personReference <- personID,
         routeReference <- routeID
     )
-    print("link insert run")
      _ = try db.run(linksInsert)
 }
 
 func populateEmailTable(db: Connection, email: GPXEmail, gpxID: Int64, personID:Int64) throws {
+    print("email insert")
+
     let insert = emailsTable.insert(
         gpxReference <- gpxID,
         personReference <- personID,
         idEmail <- email.emailID,
         domain <- email.domain
     )
-    print("email insert run")
-
     _ = try db.run(insert)
 }

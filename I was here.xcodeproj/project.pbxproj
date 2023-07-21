@@ -16,7 +16,6 @@
 		A9E87F152A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F142A607E1C00116428 /* I_was_hereUITestsLaunchTests.swift */; };
 		A9E87F282A619FAD00116428 /* CoreGPX in Frameworks */ = {isa = PBXBuildFile; productRef = A9E87F272A619FAD00116428 /* CoreGPX */; };
 		A9E87F2E2A62C17C00116428 /* MapRepresentableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */; };
-		A9EAE8E12A63227900604818 /* GpxProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9EAE8E02A63227900604818 /* GpxProcessor.swift */; };
 		A9EAE8E42A63385F00604818 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = A9EAE8E32A63385F00604818 /* SQLite */; };
 		A9EAE8E62A633A6B00604818 /* dbManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9EAE8E52A633A6B00604818 /* dbManager.swift */; };
 /* End PBXBuildFile section */
@@ -53,7 +52,6 @@
 		A9E87F2C2A62BDD100116428 /* I-was-here-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "I-was-here-Info.plist"; sourceTree = SOURCE_ROOT; };
 		A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapRepresentableView.swift; sourceTree = "<group>"; };
 		A9E964E92A6967740022C9A2 /* testgpx.gpx */ = {isa = PBXFileReference; lastKnownFileType = text; path = testgpx.gpx; sourceTree = "<group>"; };
-		A9EAE8E02A63227900604818 /* GpxProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GpxProcessor.swift; sourceTree = "<group>"; };
 		A9EAE8E52A633A6B00604818 /* dbManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = dbManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -148,7 +146,6 @@
 			children = (
 				A9E87EF82A607E1A00116428 /* ContentView.swift */,
 				A9E87F2D2A62C17C00116428 /* MapRepresentableView.swift */,
-				A9EAE8E02A63227900604818 /* GpxProcessor.swift */,
 				A9EAE8E52A633A6B00604818 /* dbManager.swift */,
 			);
 			path = Shared;
@@ -292,7 +289,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9EAE8E12A63227900604818 /* GpxProcessor.swift in Sources */,
 				A9E87EF92A607E1A00116428 /* ContentView.swift in Sources */,
 				A9E87F2E2A62C17C00116428 /* MapRepresentableView.swift in Sources */,
 				A9EAE8E62A633A6B00604818 /* dbManager.swift in Sources */,
