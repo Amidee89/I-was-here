@@ -365,8 +365,20 @@ func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
                 jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             }
             print("gpx insert run for \(importFilename)")
-            try db.transaction {
-                id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
+            var done = false
+            while !done
+            {
+                do{
+                    try db.transaction
+                    {
+                        id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
+                        done = true
+                    }
+
+                }catch{
+                    print("Retrying gpx \(importFilename): \(error)")
+                    Thread.sleep(forTimeInterval: 1) // wait for 1 seconds
+                }
             }
             print("gpx insert run for \(importFilename) done")
             
@@ -401,10 +413,15 @@ func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
                 for route in gpx.routes{
                         try populateRoutesTable (db:db, route: route, gpxID: receivedId)
                 }
-                do{
-                try populateWaypointsTable(db: db, waypoints: gpx.waypoints, gpxID: receivedId)
-                } catch {
-                    print("Failed to populate root waypoint: \(error)")
+                var done = false
+                while !done {
+                    do{
+                        try populateWaypointsTable(db: db, waypoints: gpx.waypoints, gpxID: receivedId)
+                        done = true
+                        break
+                    } catch {
+                        print("Retrying root waypoint: \(error)")
+                    }
                 }
                 print("routes done for \(importFilename)")
                 
