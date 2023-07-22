@@ -16,19 +16,6 @@ let path = NSSearchPathForDirectoriesInDomains(
 let dbFilePath = "\(path)/iwh.sqlite3"
 var db : Connection? = nil
 
-func setupDatabase(){
-    let fileManager = FileManager.default
-    if !fileManager.fileExists(atPath: dbFilePath) {
-        createDB()
-    }
-    
-    do {
-        db = try Connection(dbFilePath)
-    } catch {
-        print("Unable to open database")
-    }
-}
-
 //Tables
 let gpxTable = Table("gpx")
 let metadataTable = Table("metadata")
@@ -315,6 +302,29 @@ func createDB(){
     }
 }
 
+
+func setupDatabase(){
+    let fileManager = FileManager.default
+    if !fileManager.fileExists(atPath: dbFilePath) {
+        createDB()
+    }
+    
+    do {
+        db = try Connection(dbFilePath)
+    } catch {
+        print("Unable to open database")
+    }
+    if db != nil {
+        db!.busyTimeout = 5 // error after 5 seconds (does multiple retries)
+
+        db!.busyHandler({ tries in
+            tries < 10  // error after 30 tries
+        })
+    }
+
+
+}
+
 func processGPXFile(at url: URL) {
     var fileSizeCalculation : NSNumber? = nil
     do {
@@ -328,8 +338,7 @@ func processGPXFile(at url: URL) {
     }
 
     if let gpx = GPXParser(withURL: url)?.parsedData() {
-        populateFromGPX(gpx: gpx, url: url, fileSize: fileSizeCalculation!)
-    
+            populateFromGPX(gpx: gpx, url: url, fileSize: fileSizeCalculation!)
     }
 }
 
@@ -355,47 +364,65 @@ func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
                 let jsonExtension = try jsonEncoder.encode(extensions)
                 jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
             }
-            print("gpx insert run")
+            print("gpx insert run for \(importFilename)")
             try db.transaction {
                 id = try db.run(gpxTable.insert(version <- gpx.version, creator <- gpx.creator, importDate <- date, fileName <- importFilename, gpxExtensionsColumn <- jsonExtensionString))
             }
+            print("gpx insert run for \(importFilename) done")
             
             if let receivedId = id
             {
+                print("metadata start for \(importFilename)")
                 if let metadata = gpx.metadata {
                         try populateMetadataTable (db:db, metadata: metadata, gpxID: receivedId)
                     }
-                let concurrentQueue = DispatchQueue(label: "concurrentQueue", attributes: .concurrent)
+                print("metadata done for \(importFilename)")
+                print("tracks start for \(importFilename)")
                 let tracks = gpx.tracks
                 DispatchQueue.global(qos: .userInitiated).async {
                     DispatchQueue.concurrentPerform(iterations: tracks.count) { index in
-                        do {
-                            try populateTracksTable(db: db, track: tracks[index], gpxID: receivedId)
-                        } catch {
-                            print("Failed to populate track: \(error)")
+                        var done = false
+                        while !done {
+                            do {
+                                try populateTracksTable(db: db, track: tracks[index], gpxID: receivedId)
+                                done = true
+                                break
+                                
+                            } catch {
+                                print("Retrying track \(index): \(error)")
+                                Thread.sleep(forTimeInterval: 1) // wait for 1 seconds
+                            }
                         }
                     }
                 }
+                print("tracks done for \(importFilename)")
+                print("routes start for \(importFilename)")
+
                 for route in gpx.routes{
                         try populateRoutesTable (db:db, route: route, gpxID: receivedId)
                 }
+                do{
                 try populateWaypointsTable(db: db, waypoints: gpx.waypoints, gpxID: receivedId)
+                } catch {
+                    print("Failed to populate root waypoint: \(error)")
+                }
+                print("routes done for \(importFilename)")
+                
+                let endTime = CFAbsoluteTimeGetCurrent()
+                let executionTime = (endTime - startTime) * 1000
+                print("finished importing: ", importFilename, "took ", executionTime, "ms")
+                print("ms per byte: ", (executionTime/Double(fileSize)) )
             }
             
-            let endTime = CFAbsoluteTimeGetCurrent()
-            let executionTime = (endTime - startTime) * 1000
-            print("finished importing: ", importFilename, "took ", executionTime, "ms")
-            print("ms per byte: ", (executionTime/Double(fileSize)) )
         } catch {
             print("Database operation failed: \(error)")
         }
-
+        Thread.sleep(forTimeInterval: 2) // wait for 5 seconds
     }
 
 }
 
 func populateTracksTable (db: Connection, track: GPXTrack, gpxID: Int64) throws{
-    let startTime = CFAbsoluteTimeGetCurrent()
     let jsonEncoder = JSONEncoder()
     let jsonExtension = try jsonEncoder.encode(track.extensions)
     let jsonExtensionString = String(data: jsonExtension, encoding: .utf8)
