@@ -409,10 +409,21 @@ func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
                 }
                 print("tracks done for \(importFilename)")
                 print("routes start for \(importFilename)")
-
+                
                 for route in gpx.routes{
-                        try populateRoutesTable (db:db, route: route, gpxID: receivedId)
+                    var done = false
+                    while !done {
+                        do{
+                            try populateRoutesTable (db:db, route: route, gpxID: receivedId)
+                            done = true
+                            break
+                        } catch {
+                            print("Retrying route: \(error)")
+                        }
+                    }
                 }
+                print("routes done for \(importFilename)")
+                print("waypoints start for \(importFilename)")
                 var done = false
                 while !done {
                     do{
@@ -420,11 +431,11 @@ func populateFromGPX(gpx: GPXRoot, url: URL, fileSize: NSNumber) {
                         done = true
                         break
                     } catch {
-                        print("Retrying root waypoint: \(error)")
+                        print("Retrying route waypoint: \(error)")
                     }
                 }
-                print("routes done for \(importFilename)")
-                
+                print("waypoints end for \(importFilename)")
+
                 let endTime = CFAbsoluteTimeGetCurrent()
                 let executionTime = (endTime - startTime) * 1000
                 print("finished importing: ", importFilename, "took ", executionTime, "ms")
@@ -578,7 +589,7 @@ func populateBoundariesTable(db: Connection, boundary: GPXBounds, gpxID: Int64, 
         maxLat <- boundary.maxLatitude,
         maxLon <- boundary.maxLongitude
     )
-    print("bounds insert")
+    //print("bounds insert")
 
     _ = try db.run(boundaryInsert)
 }
@@ -589,7 +600,7 @@ func populateCopyrightTable(db: Connection, copyright: GPXCopyright, gpxID: Int6
     let calendar = Calendar.current
     let dateComponents = copyright.year.map { calendar.dateComponents([.year], from: $0) }
     let copyrightYear = dateComponents?.year
-    print("copyright insert")
+    //print("copyright insert")
 
     let copyrightInsert = copyrightTable.insert(
         gpxReference <- gpxID,
@@ -608,7 +619,7 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
         name <- person.name,
         metadataReference <- metadataID
     )
-    print("person insert")
+    //print("person insert")
 
     let personID = try db.run(personInsert)
     
@@ -622,7 +633,7 @@ func populatePersonsTable(db: Connection, person: GPXPerson, gpxID: Int64, metad
 }
 
 func populateLinkTable(db: Connection, link: GPXLink, gpxID: Int64, metadataID: Int64? = nil, waypointID: Int64? = nil, trackID: Int64? = nil, personID: Int64? = nil, routeID: Int64? = nil)throws {
-    print("link insert")
+    //print("link insert")
 
     let linksInsert = linksTable.insert(
         gpxReference <- gpxID,
