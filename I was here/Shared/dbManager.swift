@@ -8,6 +8,7 @@
 import Foundation
 import SQLite
 import CoreGPX
+import MapKit
 
 var dbQueue = DispatchQueue(label: "iamhere.dbQueue", qos: .userInitiated)
 let path = NSSearchPathForDirectoriesInDomains(
@@ -658,4 +659,39 @@ func populateEmailTable(db: Connection, email: GPXEmail, gpxID: Int64, personID:
         domain <- email.domain
     )
     _ = try db.run(insert)
+}
+
+func loadWaypointsFromDatabase() -> (waypoints: [MKPointAnnotation], boundingRegion: MKCoordinateRegion) {
+    if db == nil {
+        setupDatabase()
+    }
+    var minLat = Double.greatestFiniteMagnitude
+    var maxLat = -Double.greatestFiniteMagnitude
+    var minLon = Double.greatestFiniteMagnitude
+    var maxLon = -Double.greatestFiniteMagnitude
+    
+    var annotations: [MKPointAnnotation] = []
+    do {
+        let query = waypointsTable.order(time.desc).limit(1000)
+        for waypoint in try db!.prepare(query) {
+            let annotation = MKPointAnnotation()
+            if (waypoint[lat] != nil) && (waypoint[lon] != nil) {
+                annotation.coordinate = CLLocationCoordinate2D(latitude: waypoint[lat]!, longitude: waypoint[lon]!)
+                annotations.append(annotation)
+                minLat = min(minLat, waypoint[lat]!)
+                maxLat = max(maxLat, waypoint[lat]!)
+                minLon = min(minLon, waypoint[lon]!)
+                maxLon = max(maxLon, waypoint[lon]!)
+            }
+        }
+    } catch {
+        // Handle failure to read from the database here
+    }
+    let centerLat = (minLat + maxLat) / 2
+    let centerLon = (minLon + maxLon) / 2
+    let spanLat = abs(maxLat - minLat)
+    let spanLon = abs(maxLon - minLon)
+    let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+
+    return (annotations, region)
 }

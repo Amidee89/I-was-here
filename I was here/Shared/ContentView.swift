@@ -22,13 +22,9 @@ extension UTType {
 }
 
 struct ContentView: View {
-    var body: some View {
-        FilePickerView()
-    }
-}
-
-struct FilePickerView: View {
     @State private var isPickerPresented = false
+    @State private var waypoints: [MKPointAnnotation] = []
+    
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 34.011_286, longitude: -116.166_868),
         span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
@@ -38,9 +34,15 @@ struct FilePickerView: View {
             Button("Select GPX Folder or files") {
                 isPickerPresented = true
             }
+            Button("Visualize Waypoints") {
+                let result = loadWaypointsFromDatabase()
+                self.waypoints = result.waypoints
+                self.region = result.boundingRegion
+            }
             .padding()
             Divider()
-            MapRepresentableView(region: $region, overlays: [], annotations: [])
+            MapRepresentableView(region: $region, overlays: [], annotations: waypoints)
+
         }
         .fileImporter(
             isPresented: $isPickerPresented,
@@ -57,6 +59,8 @@ struct FilePickerView: View {
         }
     }
 }
+
+
 
 func processFiles(at urls: [URL]) {
     for url in urls {
