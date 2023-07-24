@@ -661,7 +661,7 @@ func populateEmailTable(db: Connection, email: GPXEmail, gpxID: Int64, personID:
     _ = try db.run(insert)
 }
 
-func loadWaypointsFromDatabase() -> (waypoints: [MKPointAnnotation], boundingRegion: MKCoordinateRegion) {
+func loadWaypointsFromDatabase(number:Int = 100) -> (waypoints: [MKPointAnnotation], boundingRegion: MKCoordinateRegion) {
     if db == nil {
         setupDatabase()
     }
@@ -672,7 +672,7 @@ func loadWaypointsFromDatabase() -> (waypoints: [MKPointAnnotation], boundingReg
     
     var annotations: [MKPointAnnotation] = []
     do {
-        let query = waypointsTable.order(time.desc).limit(1000)
+        let query = waypointsTable.filter(trackSegmentReference == nil && routeReference == nil).order(time.desc).limit(number)
         for waypoint in try db!.prepare(query) {
             let annotation = MKPointAnnotation()
             if (waypoint[lat] != nil) && (waypoint[lon] != nil) {

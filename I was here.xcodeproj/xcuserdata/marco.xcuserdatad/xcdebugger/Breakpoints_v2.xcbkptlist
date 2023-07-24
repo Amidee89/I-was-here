@@ -7,49 +7,256 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1"
+            uuid = "B9CA1D9D-5074-4C9C-8F14-264AE18F1210"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "I was here/Shared/dbManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "399"
-            endingLineNumber = "399"
-            landmarkName = "populateWaypointsTable(db:waypoints:gpxID:tracksegmentID:routeID:)"
+            startingLineNumber = "342"
+            endingLineNumber = "342"
+            landmarkName = "processGPXFile(at:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "639F3820-BF46-41EB-9DDD-A880705C0B7A"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "343"
+            endingLineNumber = "343"
+            landmarkName = "processGPXFile(at:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "A2942B5D-175D-42D0-AD79-56DBE7A8B4E7"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "349"
+            endingLineNumber = "349"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
             landmarkType = "9">
             <Locations>
                <Location
-                  uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1 - c9a21e8a57e62605"
+                  uuid = "A2942B5D-175D-42D0-AD79-56DBE7A8B4E7 - 4eba993e59a31ffc"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () throws -&gt; () in I_was_here.populateWaypointsTable(db: SQLite.Connection, waypoints: Swift.Array&lt;CoreGPX.GPXWaypoint&gt;, gpxID: Swift.Int64, tracksegmentID: Swift.Optional&lt;Swift.Int64&gt;, routeID: Swift.Optional&lt;Swift.Int64&gt;) throws -&gt; ()"
+                  symbolName = "I_was_here.populateFromGPX(gpx: CoreGPX.GPXRoot, url: Foundation.URL, fileSize: __C.NSNumber) -&gt; ()"
                   moduleName = "I was here"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/marco/Documents/GitHub/Iwashere/I%20was%20here/I%20was%20here/Shared/dbManager.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "399"
-                  endingLineNumber = "399"
-                  offsetFromSymbolStart = "3308">
+                  startingLineNumber = "348"
+                  endingLineNumber = "348"
+                  offsetFromSymbolStart = "340">
                </Location>
                <Location
-                  uuid = "BF9956E9-9C32-4474-BDE2-795638D940B1 - c9a21e8a57e62605"
+                  uuid = "A2942B5D-175D-42D0-AD79-56DBE7A8B4E7 - 940ac5145c1948f4"
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () throws -&gt; () in I_was_here.populateWaypointsTable(db: SQLite.Connection, waypoints: Swift.Array&lt;CoreGPX.GPXWaypoint&gt;, gpxID: Swift.Int64, tracksegmentID: Swift.Optional&lt;Swift.Int64&gt;, routeID: Swift.Optional&lt;Swift.Int64&gt;) throws -&gt; ()"
+                  symbolName = "closure #1 () -&gt; () in I_was_here.populateFromGPX(gpx: CoreGPX.GPXRoot, url: Foundation.URL, fileSize: __C.NSNumber) -&gt; ()"
                   moduleName = "I was here"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/marco/Documents/GitHub/Iwashere/I%20was%20here/I%20was%20here/Shared/dbManager.swift"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "399"
-                  endingLineNumber = "399"
-                  offsetFromSymbolStart = "3292">
+                  startingLineNumber = "350"
+                  endingLineNumber = "350"
+                  offsetFromSymbolStart = "876">
+               </Location>
+               <Location
+                  uuid = "A2942B5D-175D-42D0-AD79-56DBE7A8B4E7 - 940ac5145c1948f4"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 () -&gt; () in I_was_here.populateFromGPX(gpx: CoreGPX.GPXRoot, url: Foundation.URL, fileSize: __C.NSNumber) -&gt; ()"
+                  moduleName = "I was here"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/marco/Documents/GitHub/Iwashere/I%20was%20here/I%20was%20here/Shared/dbManager.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "350"
+                  endingLineNumber = "350"
+                  offsetFromSymbolStart = "532">
                </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "7396E8E6-79E3-496D-A003-32F21F0A4EBC"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "452"
+            endingLineNumber = "452"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0325947E-2452-4B70-A599-F3CCAF330CB5"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "358"
+            endingLineNumber = "358"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "624401D1-C6B3-4A27-B38B-3CD9DCBA835C"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "375"
+            endingLineNumber = "375"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "6A8496BC-5D5F-405C-8541-DBD5BE73FD24"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "369"
+            endingLineNumber = "369"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "21436C11-D479-4F4E-81D6-8BBE172C4DD3"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "400"
+            endingLineNumber = "400"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "121CBE33-9AB0-448B-9237-3BE47448928D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "384"
+            endingLineNumber = "384"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "CD698192-C56C-4088-99A0-1883951A9F20"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "390"
+            endingLineNumber = "390"
+            landmarkName = "populateFromGPX(gpx:url:fileSize:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E9E101D2-70DB-46EA-9E46-CC694E00E215"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "677"
+            endingLineNumber = "677"
+            landmarkName = "loadWaypointsFromDatabase(number:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2242827E-02D1-4F74-B970-5318F64AA38E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "676"
+            endingLineNumber = "676"
+            landmarkName = "loadWaypointsFromDatabase(number:)"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4EFD5991-4B06-46F4-B1F6-60AD3B2E6824"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "I was here/Shared/dbManager.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "697"
+            endingLineNumber = "697"
+            landmarkName = "loadWaypointsFromDatabase(number:)"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

@@ -24,7 +24,7 @@ extension UTType {
 struct ContentView: View {
     @State private var isPickerPresented = false
     @State private var waypoints: [MKPointAnnotation] = []
-    
+    @State private var numWaypoints = "1000"
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 34.011_286, longitude: -116.166_868),
         span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
@@ -34,10 +34,18 @@ struct ContentView: View {
             Button("Select GPX Folder or files") {
                 isPickerPresented = true
             }
-            Button("Visualize Waypoints") {
-                let result = loadWaypointsFromDatabase()
-                self.waypoints = result.waypoints
-                self.region = result.boundingRegion
+            HStack{
+                Spacer()
+                Text("Number of Waypoints: ")
+                TextField("Number", text: $numWaypoints)
+                    .frame(width: 60) // Change this to your desired width
+                Button("Visualize Waypoints") {
+                    print(numWaypoints)
+                    let result = loadWaypointsFromDatabase(number: Int(numWaypoints) ?? 1000)
+                    self.waypoints = result.waypoints
+                    self.region = result.boundingRegion
+                }
+                Spacer()
             }
             .padding()
             Divider()
@@ -82,4 +90,3 @@ func processFilesInFolder(at url: URL) {
         // Handle failure to read the directory here
     }
 }
-
