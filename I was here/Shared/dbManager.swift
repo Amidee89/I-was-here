@@ -327,6 +327,7 @@ func setupDatabase(){
 }
 
 func processGPXFile(at url: URL) {
+    setupDatabase()
     var fileSizeCalculation : NSNumber? = nil
     do {
         let fileAttributes = try FileManager.default.attributesOfItem(atPath: url.path)
@@ -694,4 +695,55 @@ func loadWaypointsFromDatabase(number:Int = 100) -> (waypoints: [MKPointAnnotati
     let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
 
     return (annotations, region)
+}
+
+func loadTracksFromDatabase(number: Int = 100) -> (polylines: [MKPolyline], boundingRegion: MKCoordinateRegion) {
+    if db == nil {
+        setupDatabase()
+    }
+
+    var polylines: [MKPolyline] = []
+    var minLat = Double.greatestFiniteMagnitude
+    var maxLat = -Double.greatestFiniteMagnitude
+    var minLon = Double.greatestFiniteMagnitude
+    var maxLon = -Double.greatestFiniteMagnitude
+
+    do {
+        let tracks = try db!.prepare(tracksTable.order(time.asc).limit(number))
+        for track in tracks {
+            let trackSegments = try db!.prepare(tracksegmentsTable.filter(trackReference == track[idColumn]))
+
+            for trackSegment in trackSegments {
+                var segmentCoordinates: [CLLocationCoordinate2D] = []
+                let waypoints = try db!.prepare(waypointsTable.filter(trackSegmentReference == trackSegment[idColumn]))
+                for waypoint in waypoints {
+                    let latValue = waypoint[lat]
+                    let lonValue = waypoint[lon]
+                    let coordinate = CLLocationCoordinate2D(latitude: latValue!, longitude: lonValue!)
+                    segmentCoordinates.append(coordinate)
+                    
+                    minLat = min(minLat, latValue!)
+                    maxLat = max(maxLat, latValue!)
+                    minLon = min(minLon, lonValue!)
+                    maxLon = max(maxLon, lonValue!)
+                }
+                if segmentCoordinates.count == 0{
+                    print("empty segment!")
+                }
+                let polyline = MKPolyline(coordinates: segmentCoordinates, count: segmentCoordinates.count)
+                polylines.append(polyline)
+                print(polyline)
+            }
+        }
+    } catch {
+        // Handle failure to read from the database here
+    }
+
+    let centerLat = (minLat + maxLat) / 2
+    let centerLon = (minLon + maxLon) / 2
+    let spanLat = abs(maxLat - minLat)
+    let spanLon = abs(maxLon - minLon)
+    let region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: centerLat, longitude: centerLon), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+
+    return (polylines, region)
 }

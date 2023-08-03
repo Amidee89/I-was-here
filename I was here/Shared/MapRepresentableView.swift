@@ -11,6 +11,7 @@ import MapKit
 struct MapRepresentableView: UIViewRepresentable {
 
     @Binding var region: MKCoordinateRegion
+    var polylines: [MKPolyline] = []
     var overlays: [MKOverlay]
     var annotations: [MKAnnotation]
 
@@ -23,6 +24,7 @@ struct MapRepresentableView: UIViewRepresentable {
     func updateUIView(_ view: MKMapView, context: Context) {
         view.setRegion(region, animated: true)
         view.addOverlays(overlays)
+        view.addOverlays(polylines)
         view.addAnnotations(annotations)
     }
 
@@ -38,7 +40,11 @@ struct MapRepresentableView: UIViewRepresentable {
         }
 
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            // This is a placeholder, you need to return a proper MKOverlayRenderer based on the overlay type
+            if overlay is MKPolyline {
+                let renderer = MKPolylineRenderer(overlay: overlay)
+                renderer.strokeColor = .blue
+                return renderer
+            }
             return MKOverlayRenderer()
         }
     }
@@ -47,6 +53,7 @@ struct MapRepresentableView: UIViewRepresentable {
 struct MapRepresentableView: NSViewRepresentable {
     @Binding var region: MKCoordinateRegion
         var overlays: [MKOverlay]
+        var polylines: [MKPolyline]
         var annotations: [MKAnnotation]
 
         func makeNSView(context: Context) -> MKMapView {
@@ -58,6 +65,7 @@ struct MapRepresentableView: NSViewRepresentable {
         func updateNSView(_ nsView: MKMapView, context: Context) {
             nsView.setRegion(region, animated: true)
             nsView.addOverlays(overlays)
+            nsView.addOverlays(polylines)
             nsView.addAnnotations(annotations)
         }
 
@@ -73,7 +81,11 @@ struct MapRepresentableView: NSViewRepresentable {
             }
 
             func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-                // This is a placeholder, you need to return a proper MKOverlayRenderer based on the overlay type
+                if overlay is MKPolyline {
+                    let renderer = MKPolylineRenderer(overlay: overlay)
+                    renderer.strokeColor = .blue
+                    return renderer
+                }
                 return MKOverlayRenderer()
             }
         }

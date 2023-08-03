@@ -24,7 +24,8 @@ extension UTType {
 struct ContentView: View {
     @State private var isPickerPresented = false
     @State private var waypoints: [MKPointAnnotation] = []
-    @State private var numWaypoints = "1000"
+    @State private var polylines: [MKPolyline] = []
+    @State private var rangeToVisualize = "1000"
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 34.011_286, longitude: -116.166_868),
         span: MKCoordinateSpan(latitudeDelta: 0.2, longitudeDelta: 0.2)
@@ -37,19 +38,23 @@ struct ContentView: View {
             HStack{
                 Spacer()
                 Text("Number of Waypoints: ")
-                TextField("Number", text: $numWaypoints)
+                TextField("Number", text: $rangeToVisualize)
                     .frame(width: 60) // Change this to your desired width
                 Button("Visualize Waypoints") {
-                    print(numWaypoints)
-                    let result = loadWaypointsFromDatabase(number: Int(numWaypoints) ?? 1000)
+                    let result = loadWaypointsFromDatabase(number: Int(rangeToVisualize) ?? 1000)
                     self.waypoints = result.waypoints
+                    self.region = result.boundingRegion
+                }
+                Button("Visualize Tracks") {
+                    let result = loadTracksFromDatabase(number: Int(rangeToVisualize) ?? 1000)
+                    self.polylines = result.polylines
                     self.region = result.boundingRegion
                 }
                 Spacer()
             }
             .padding()
             Divider()
-            MapRepresentableView(region: $region, overlays: [], annotations: waypoints)
+            MapRepresentableView(region: $region, overlays: [], polylines: polylines, annotations: waypoints)
 
         }
         .fileImporter(
